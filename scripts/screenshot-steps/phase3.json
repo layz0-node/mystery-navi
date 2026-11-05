@@ -1,4 +1,5 @@
 [
+  { "click": "#debug-toggle" },
   { "shot": "p3-1-initial", "full": true },
 
   { "fill": "#dbg-lat", "value": "35.7280" },
@@ -41,6 +42,7 @@
   { "shot": "p3-5-temp-arrived", "full": true },
 
   { "localStorage": { "mysteryNavi.v1": "{\"schemaVersion\": \"壊れたデータ\"" } },
+  { "click": "#debug-toggle" },
   { "click": "#dbg-reset" },
   { "shot": "p3-6-stored", "full": true }
 ]

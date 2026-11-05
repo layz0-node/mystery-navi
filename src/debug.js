@@ -140,7 +140,8 @@ async function copyText(text, fallbackNode) {
 
 // ---------- パネル ----------
 
-export function mountDebugPanel({ root, store, sensors, shops, storage, settings }) {
+// testShops：ダミー店モード（?debug=1&shops=test）。onChange(settings)：設定や記録を変えたら呼ぶ（画面を描き直す）
+export function mountDebugPanel({ root, store, sensors, shops, storage, settings, testShops = false, onChange = () => {} }) {
   let current = { ...settings };
   let lastFix = null;
   const message = el("p", { id: "debug-message", class: "debug-message", role: "status" });
@@ -153,6 +154,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     current = saveDebugSettings(storage, { ...current, ...patch });
     sensors.setOverrides({ position: current.position, heading: current.heading, timeOffsetMs: current.timeOffsetMs });
     render();
+    onChange(current);
   }
 
   const num = (id) => Number(document.getElementById(id).value);
@@ -372,7 +374,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
       const pre = el("pre", { class: "debug-raw", text: e.raw });
       entriesBox.append(
         el("div", { class: "debug-entry", dataset: { kind: e.kind } }, [
-          el("p", { class: "debug-entry-title", text: `${KIND_LABELS[e.kind]}：${e.key}` }),
+          el("p", { class: "debug-entry-title", text: `${KIND_LABELS[e.kind]}：${storage.realKey ? storage.realKey(e.key) : e.key}` }),
           pre,
           button("コピー", undefined, async () => {
             say((await copyText(e.raw, pre)) ? `${e.key} をコピーしました` : "コピーできませんでした。選択した文字をコピーしてください");
@@ -382,8 +384,15 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     }
   }
 
-  const panel = el("aside", { class: "debug-panel", id: "debug-panel", "aria-label": "デバッグ" }, [
-    el("h1", { text: "デバッグ" }),
+  const modeNote = el("p", {
+    class: "debug-note",
+    text: testShops
+      ? "ダミー店モード：tests/fixtures/shops.json の店で動いています。記録は本物とは別の場所（mysteryNavi.test.v1）に保存します"
+      : "本物の店リスト（shops.json）で動いています。ダミー店で試すときは URL に &shops=test を付けます",
+  });
+  const panel = el("aside", { class: "debug-panel", id: "debug-panel", "aria-label": "デバッグ", hidden: "" }, [
+    el("h1", { text: testShops ? "デバッグ（ダミー店）" : "デバッグ" }),
+    modeNote,
     message,
     status,
     position,
@@ -394,7 +403,22 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     single,
     stored,
   ]);
-  root.append(panel);
+  // 開閉ボタン。最初は閉じておく（ナビ画面を隠さないため）
+  const toggle = el("button", {
+    type: "button",
+    id: "debug-toggle",
+    class: "debug-toggle",
+    "aria-expanded": "false",
+    "aria-controls": "debug-panel",
+    text: testShops ? "デバッグ・ダミー店" : "デバッグ",
+    onclick: () => {
+      panel.hidden = !panel.hidden;
+      toggle.setAttribute("aria-expanded", String(!panel.hidden));
+      if (!panel.hidden) panel.scrollIntoView({ block: "start" });
+      else window.scrollTo(0, 0);
+    },
+  });
+  root.append(toggle, panel);
 
   // ---------- 表示の更新 ----------
 
@@ -451,6 +475,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
   function refresh() {
     render();
     renderEntries();
+    onChange(current);
   }
 
   sensors.subscribe(render);

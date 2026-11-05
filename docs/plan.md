@@ -325,6 +325,11 @@ iPhone と Android で方位の取り方が違うので、両方に対応して�
 - 方位の平滑化で、359度と0度の境目で値が一回転しない（ここはテストを書く）
 - 横向きの補正が計算に入っている（ここはテストを書く）
 
+**スクリーンショット**：本物の店リストに左右されないよう、ダミー店モードで撮る（12章）
+```bash
+npm run screenshot -- --url="?debug=1&shops=test" --steps=scripts/screenshot-steps/phase3.json
+```
+
 **たまおの確認**：ここで一度スマホで試したくなるが、HTTPSが必要なので Phase 7 まで待つ。
 
 ---
@@ -358,6 +363,13 @@ Phase 4 を進めてください。requirements.md 3章の S0 と S1、4-2、8�
 - 幅390px前後のスマホ表示で崩れない
 - 方位センサーがない場合は N を上に固定した表示になる
 - S1で画面のスリープ防止をかけ、S1以外に移ると解除するコードがある（実機の確認は Phase 7）
+
+**スクリーンショット**（ダミー店モード）
+```bash
+npm run screenshot -- --url="?debug=1&shops=test" --steps=scripts/screenshot-steps/phase4.json
+npm run screenshot -- --url="?debug=1&shops=test" --reduced-motion --steps=scripts/screenshot-steps/phase4-reduced.json
+npm run screenshot -- --name=trophy-samples --url="dev/trophy-samples.html" --full
+```
 
 **たまおの確認**：スクリーンショットで、見た目が3月の画面設計のイメージと合っているか。赤黒が「禍々しい」と感じられるか。トロフィーの形の3案からどれにするか。トロフィーが「さりげない」と感じられるか。
 

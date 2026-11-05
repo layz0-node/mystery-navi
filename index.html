@@ -7,14 +7,104 @@
   <title>　</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Noto+Sans+JP:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Noto+Sans+JP:wght@300;400;500&display=swap">
   <link rel="stylesheet" href="./style.css">
   <script type="module" src="./src/app.js"></script>
 </head>
 <body>
-  <main class="placeholder">
-    <p class="placeholder-mark" aria-hidden="true">N</p>
-    <p class="placeholder-text">準備中</p>
+  <main id="app">
+    <!-- S0 起動画面（アプリ名は出さない） -->
+    <section id="screen-start" class="screen screen-start" aria-label="はじめる">
+      <svg class="start-mark" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="54" class="dial-ring"/>
+        <circle cx="60" cy="60" r="46" class="dial-ring dial-ring--inner"/>
+        <polygon points="60,26 67,60 53,60" class="start-needle"/>
+        <polygon points="60,94 67,60 53,60" class="start-needle start-needle--south"/>
+        <text x="60" y="18" class="dial-label">N</text>
+      </svg>
+      <button id="start-button" type="button" class="start-button">はじめる</button>
+      <p id="start-status" class="start-status" role="status"></p>
+
+      <div id="install-guide" class="install-guide" hidden>
+        <p>ホーム画面に追加して使ってください。ブラウザのままだと、しばらく開かないうちに記録が消えることがあります</p>
+        <ul>
+          <li>iPhone：共有ボタン →「ホーム画面に追加」</li>
+          <li>Android：メニュー →「ホーム画面に追加」</li>
+        </ul>
+        <p>ブラウザで使っていた記録は、記録パネルの「書き出す」→ ホーム画面のアプリで「読み込む」で移せます</p>
+      </div>
+
+      <ul class="start-notes">
+        <li>20歳未満の方はご利用いただけません</li>
+        <li>位置情報はこの端末の中だけで使い、どこにも送信しません</li>
+      </ul>
+    </section>
+
+    <!-- S1 ナビ画面 -->
+    <section id="screen-nav" class="screen screen-nav" data-color="normal" aria-label="ナビ" hidden>
+      <button id="trophy" type="button" class="trophy" aria-label="記録"></button>
+      <p id="notice" class="notice" role="status" aria-live="polite"></p>
+
+      <div class="compass" id="compass">
+        <svg id="compass-dial" class="compass-dial" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="90" class="dial-ring"/>
+          <circle cx="100" cy="100" r="78" class="dial-ring dial-ring--inner"/>
+          <g class="dial-ticks">
+            <line x1="100" y1="10" x2="100" y2="19" class="dial-tick dial-tick--main"/>
+            <line x1="100" y1="10" x2="100" y2="15" class="dial-tick" transform="rotate(45 100 100)"/>
+            <line x1="100" y1="10" x2="100" y2="19" class="dial-tick dial-tick--main" transform="rotate(90 100 100)"/>
+            <line x1="100" y1="10" x2="100" y2="15" class="dial-tick" transform="rotate(135 100 100)"/>
+            <line x1="100" y1="10" x2="100" y2="19" class="dial-tick dial-tick--main" transform="rotate(180 100 100)"/>
+            <line x1="100" y1="10" x2="100" y2="15" class="dial-tick" transform="rotate(225 100 100)"/>
+            <line x1="100" y1="10" x2="100" y2="19" class="dial-tick dial-tick--main" transform="rotate(270 100 100)"/>
+            <line x1="100" y1="10" x2="100" y2="15" class="dial-tick" transform="rotate(315 100 100)"/>
+          </g>
+          <text x="100" y="36" class="dial-label dial-label--north" data-x="100" data-y="36">N</text>
+          <text x="164" y="100" class="dial-label" data-x="164" data-y="100">E</text>
+          <text x="100" y="164" class="dial-label" data-x="100" data-y="164">S</text>
+          <text x="36" y="100" class="dial-label" data-x="36" data-y="100">W</text>
+        </svg>
+        <div id="compass-arrow" class="compass-arrow" aria-hidden="true">
+          <svg viewBox="0 0 28 48" width="28" height="48">
+            <defs>
+              <linearGradient id="cursed-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" class="cursed-stop-tip"/>
+                <stop offset="1" class="cursed-stop-base"/>
+              </linearGradient>
+            </defs>
+            <polygon points="14,1 27,47 1,47" class="arrow-shape"/>
+          </svg>
+        </div>
+      </div>
+
+      <p id="north-up" class="north-up" hidden>北を上にして見てください</p>
+      <p id="distance" class="distance">—</p>
+      <p id="temp-label" class="temp-label" hidden></p>
+
+      <div class="nav-bottom">
+        <ol id="hints" class="hints" aria-label="ヒント"></ol>
+        <button id="reselect" type="button" class="reselect">別のお店にする</button>
+      </div>
+    </section>
+
+    <!-- S2〜S4 の仮の表示（Phase 5 で作る） -->
+    <section id="screen-other" class="screen screen-other" hidden>
+      <p id="other-title" class="other-title"></p>
+      <p id="other-name" class="other-name"></p>
+      <p id="other-detail" class="other-detail"></p>
+      <p class="other-note">この画面は準備中です</p>
+    </section>
+
+    <!-- 「別のお店にする」の確認 -->
+    <div id="confirm" class="confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-text" hidden>
+      <div class="confirm-card">
+        <p id="confirm-text">今のお店をやめて、別のお店を探しますか？</p>
+        <div class="confirm-buttons">
+          <button id="confirm-yes" type="button" class="confirm-button confirm-button--primary">探す</button>
+          <button id="confirm-no" type="button" class="confirm-button">やめる</button>
+        </div>
+      </div>
+    </div>
   </main>
 </body>
 </html>

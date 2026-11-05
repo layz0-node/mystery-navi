@@ -158,6 +158,47 @@ export function getLocalStorage() {
   }
 }
 
+// ---------- ダミー店モードの保存先（12章） ----------
+
+// ダミー店モード（?debug=1&shops=test）で使う保存データのキー。本物の記録と混ざらないように分ける
+export const TEST_SHOPS_STORAGE_KEY = "mysteryNavi.test.v1";
+
+function isAppKey(key) {
+  return key === STORAGE_KEY || key.startsWith(`${STORAGE_KEY}.`);
+}
+
+function isTestKey(key) {
+  return key === TEST_SHOPS_STORAGE_KEY || key.startsWith(`${TEST_SHOPS_STORAGE_KEY}.`);
+}
+
+// storage を包み、保存データのキー（mysteryNavi.v1 と、それで始まる退避先）を
+// mysteryNavi.test.v1… に読み替える。ほかのキー（デバッグの設定など）はそのまま通す。
+// 包んだ側からは本物の保存データは見えず、書き換えもできない。保存データの形は変えない
+export function testShopsStorage(storage) {
+  if (!storage) return null;
+  const toReal = (key) => (isAppKey(key) ? TEST_SHOPS_STORAGE_KEY + key.slice(STORAGE_KEY.length) : key);
+  const visibleKeys = () => {
+    const out = [];
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i);
+      if (typeof k !== "string" || isAppKey(k)) continue; // 本物の保存データは見せない
+      out.push(isTestKey(k) ? STORAGE_KEY + k.slice(TEST_SHOPS_STORAGE_KEY.length) : k);
+    }
+    return out;
+  };
+  return {
+    getItem: (key) => storage.getItem(toReal(key)),
+    setItem: (key, value) => storage.setItem(toReal(key), value),
+    removeItem: (key) => storage.removeItem(toReal(key)),
+    get length() {
+      return visibleKeys().length;
+    },
+    key: (i) => visibleKeys()[i] ?? null,
+    // 表示用：実際に保存されているキーの名前
+    realKey: toReal,
+  };
+}
+
 // 保存データの本体と、退避したデータ（broken・beforeImport・beforeReset）を、加工しない文字列のまま返す（12章）。
 // 読むだけ。ほかのキー（デバッグの設定など）は含めない
 // → [{ key, raw, kind: "main" | "broken" | "beforeImport" | "beforeReset" }]

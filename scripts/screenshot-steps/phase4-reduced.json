@@ -1,0 +1,20 @@
+[
+  { "click": "#debug-toggle" },
+  { "fill": "#dbg-time-input", "value": "2026-11-05T21:00" },
+  { "click": "#dbg-set-time" },
+  { "fill": "#dbg-heading", "value": "59" },
+  { "select": "#dbg-one-shop", "value": "shop_001" },
+  { "select": "#dbg-one-value", "value": "bad" },
+  { "fill": "#dbg-one-time", "value": "2026-11-01T20:00" },
+  { "click": "#dbg-one-add" },
+  { "click": "#debug-toggle" },
+  { "click": "#start-button" },
+  { "wait": 800 },
+  { "shot": "p4r-1-cursed-a" },
+  { "wait": 1500 },
+  { "shot": "p4r-2-cursed-b" },
+  { "click": "#reselect" },
+  { "click": "#confirm-yes" },
+  { "wait": 100 },
+  { "shot": "p4r-3-reselected" }
+]

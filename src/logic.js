@@ -380,6 +380,57 @@ export function unwrapAngle(prevShown, next) {
   return prevShown + angleDiff(prevShown, next);
 }
 
+// ---------- ナビ画面の表示（S1・4-2） ----------
+
+// 方位センサーの値を画面に使えるか（センサーが動いていて、値がある）
+export function headingUsable(sensorState) {
+  return sensorState?.headingStatus === "active" && Number.isFinite(sensorState.heading);
+}
+
+// 文字盤と矢印の角度（度）。どちらも同じ補正後の向き（端末の方位 ＋ 磁北の補正）を使う。
+// 文字盤は N が本当の北を指すように回し、矢印は店の方向を指す。
+// heading がない（方位センサーが使えない）ときは、N を画面の上に固定し、矢印は北を基準にした方角を指す
+export function compassAngles(bearing, heading, declination = 0) {
+  if (!Number.isFinite(heading)) return { northUp: true, dial: 0, arrow: normalizeDeg(bearing) };
+  return {
+    northUp: false,
+    dial: normalizeDeg(-(heading + declination)),
+    arrow: arrowAngle(bearing, heading, declination),
+  };
+}
+
+// 行き先が変わったときの矢印の回し先（CSS の連続した角度）。
+// 時計回りに turns 回転してから、新しい方向で止まる（4-2・N1）
+export function spinAngle(prevShown, next, turns = 1) {
+  const from = Number.isFinite(prevShown) ? prevShown : 0;
+  return from + normalizeDeg(next - from) + 360 * turns;
+}
+
+// ヒント欄の3枠。解放済みの枠だけ文字を入れる。3つ目はナビ画面では解放しない（到着画面で出す）
+// → [{ open, text, lockLabel }]
+export function hintSlots(hints, unlockedHints) {
+  const labels = [`${HINT1_RADIUS_M}m で解放`, `${HINT2_RADIUS_M}m で解放`, "到着で解放"];
+  return labels.map((lockLabel, i) => {
+    const open = i < 2 && i < (unlockedHints ?? 0);
+    return { open, text: open ? String(hints?.[i] ?? "") : null, lockLabel };
+  });
+}
+
+// 選び直した結果のお知らせ（4-2）
+// → "changed"（別の店になった） | "same"（候補がその店だけ） | "none"（候補がない → S3）
+export function reselectOutcome(previousShopId, result) {
+  if (result?.result !== "ok") return "none";
+  return result.shop.id === previousShopId ? "same" : "changed";
+}
+
+// URL の検索文字列から、デバッグとダミー店モードを決める（12章）。
+// ダミー店モードは ?debug=1 のときだけ効く
+export function appMode(search) {
+  const p = new URLSearchParams(search ?? "");
+  const debug = p.get("debug") === "1";
+  return { debug, testShops: debug && p.get("shops") === "test" };
+}
+
 // 方位センサーの状態（HEADING_TIMEOUT_SEC 秒待っても値が来なければ「使えない」）
 // state：{ status: "waiting" | "active" | "unavailable" | "denied", startedAtMs }
 // event：{ type: "value", heading, atMs } | { type: "tick", atMs } | { type: "denied" }

@@ -47,43 +47,459 @@ body {
   font-family: var(--font-body);
 }
 
-/* Phase 0 の仮の表示（Phase 4 で置き換える） */
-.placeholder {
+body {
+  font-weight: 300;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- 画面の共通 ---------- */
+.screen {
   min-height: 100vh;
   min-height: 100dvh;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px;
 }
 
-.placeholder-mark {
+/* コンパスの線（S0・S1 共通） */
+.dial-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1;
+}
+
+.dial-ring--inner {
+  stroke: var(--border);
+}
+
+.dial-tick {
+  stroke: var(--text-dim);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.dial-tick--main {
+  stroke: var(--text-muted);
+}
+
+.dial-label {
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.dial-label--north {
+  fill: var(--text);
+}
+
+/* ---------- S0 起動画面 ---------- */
+.screen-start {
+  justify-content: center;
+  gap: 28px;
+}
+
+.start-mark {
+  width: 120px;
+  height: 120px;
+}
+
+.start-needle {
+  fill: var(--accent);
+  opacity: 0.85;
+}
+
+.start-needle--south {
+  fill: var(--text-dim);
+}
+
+.start-button {
+  min-width: 168px;
+  padding: 12px 28px;
+  border: 1px solid rgba(200, 184, 154, 0.45);
+  border-radius: 999px;
+  background: rgba(200, 184, 154, 0.06);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+}
+
+.start-button:disabled {
+  opacity: 0.5;
+}
+
+.start-status {
+  margin: -16px 0 0;
+  min-height: 1.5em;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.install-guide {
+  width: 100%;
+  max-width: 340px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.install-guide p {
   margin: 0;
-  width: 96px;
-  height: 96px;
+}
+
+.install-guide ul {
+  margin: 6px 0;
+  padding-left: 1.2em;
+}
+
+.start-notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+/* ---------- S1 ナビ画面 ---------- */
+.screen-nav {
+  --arrow-color: var(--accent);
+  position: relative;
+  padding-top: calc(env(safe-area-inset-top) + 56px);
+}
+
+.screen-nav[data-color="mint"] {
+  --arrow-color: var(--revisit);
+}
+
+.screen-nav[data-color="bad"] {
+  --arrow-color: var(--cursed);
+}
+
+/* トロフィー（右上の隅に小さく。コンパスより目立たせない） */
+.trophy {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   display: grid;
   place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 20px;
+  border: 0;
+  background: none;
+  opacity: 0.8;
 }
 
-.placeholder-text {
+.trophy-icon--none { color: var(--trophy-none); }
+.trophy-icon--iron { color: var(--trophy-iron); }
+.trophy-icon--bronze { color: var(--trophy-bronze); }
+.trophy-icon--silver { color: var(--trophy-silver); }
+.trophy-icon--gold { color: var(--trophy-gold); }
+.trophy-icon--emerald { color: var(--trophy-emerald); }
+.trophy-icon--diamond { color: var(--trophy-diamond); }
+.trophy-icon--polaris {
+  color: var(--trophy-polaris);
+  filter: drop-shadow(0 0 3px rgba(244, 241, 255, 0.55));
+}
+
+/* 一時的なお知らせ（コンパスの上） */
+.notice {
   margin: 0;
+  min-height: 40px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text);
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.notice.is-visible {
+  opacity: 1;
+}
+
+/* コンパス */
+.compass {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-top: 24px;
+}
+
+.compass-dial {
+  width: 200px;
+  height: 200px;
+  display: block;
+}
+
+.compass-arrow {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.compass-arrow.is-spinning {
+  transition: transform 1.4s cubic-bezier(0.3, 0.1, 0.2, 1);
+}
+
+.compass-arrow svg {
+  overflow: visible;
+  filter: drop-shadow(0 0 12px var(--arrow-color));
+}
+
+.arrow-shape {
+  fill: var(--arrow-color);
+}
+
+.cursed-stop-tip {
+  stop-color: var(--cursed);
+}
+
+.cursed-stop-base {
+  stop-color: var(--cursed-deep);
+}
+
+/* 赤黒の矢印：深い赤から黒へ。暗い赤の光がゆっくり脈打つ（8章） */
+.screen-nav[data-color="bad"] .arrow-shape {
+  fill: url(#cursed-gradient);
+  stroke: rgba(142, 22, 38, 0.7);
+  stroke-width: 0.6;
+}
+
+.screen-nav[data-color="bad"] .compass-arrow svg {
+  animation: cursed-pulse 3s ease-in-out infinite;
+}
+
+@keyframes cursed-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(142, 22, 38, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(142, 22, 38, 0.85));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-nav[data-color="bad"] .compass-arrow svg {
+    animation: none;
+    filter: drop-shadow(0 0 8px rgba(142, 22, 38, 0.6));
+  }
+
+  .compass-arrow.is-spinning {
+    transition: none;
+  }
+
+  .notice {
+    transition: none;
+  }
+}
+
+.north-up {
+  margin: 12px 0 0;
   color: var(--text-muted);
+  font-size: 12px;
+}
+
+.distance {
+  margin: 28px 0 0;
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.screen-nav[data-color="mint"] .distance {
+  color: var(--revisit);
+}
+
+.temp-label {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.nav-bottom {
+  width: 100%;
+  max-width: 400px;
+  margin-top: auto;
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ヒント欄 */
+.hints {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.hint {
+  min-height: 38px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.hint--open {
+  background: var(--surface);
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+}
+
+.hint-mark {
+  color: var(--arrow-color);
+  flex: none;
+}
+
+.hint--locked {
+  border: 1px dashed var(--text-dim);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reselect {
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 「別のお店にする」の確認 */
+.confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(10, 10, 15, 0.78);
+}
+
+.confirm-card {
+  width: 100%;
+  max-width: 320px;
+  padding: 20px 16px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface2);
   font-size: 14px;
+  text-align: center;
+}
+
+.confirm-card p {
+  margin: 0 0 16px;
+  line-height: 1.7;
+}
+
+.confirm-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.confirm-button {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.confirm-button--primary {
+  border-color: rgba(200, 184, 154, 0.35);
+  background: rgba(200, 184, 154, 0.08);
+  color: var(--accent);
+}
+
+/* ---------- S2〜S4 の仮の表示（Phase 5 で作る） ---------- */
+.screen-other {
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.screen-other p {
+  margin: 0;
+}
+
+.other-title {
+  font-size: 16px;
+}
+
+.other-name {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.other-detail {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.other-note {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+/* ---------- デバッグの開閉ボタン（?debug=1 のときだけ） ---------- */
+.debug-toggle {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 12px);
+  left: 12px;
+  z-index: 20;
+  padding: 4px 8px;
+  border: 1px dashed var(--text-dim);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.debug-panel {
+  margin-top: 16px !important;
 }
 
 /* デバッグパネル（?debug=1 のときだけ。requirements.md 12章） */
-body:has(.debug-panel) .placeholder {
-  min-height: auto;
-  padding: 24px 16px 8px;
-}
-
 .debug-panel {
   margin: 0 16px 32px;
   padding: 12px;
