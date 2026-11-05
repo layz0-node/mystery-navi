@@ -368,7 +368,6 @@ Phase 4 を進めてください。requirements.md 3章の S0 と S1、4-2、8�
 ```bash
 npm run screenshot -- --url="?debug=1&shops=test" --steps=scripts/screenshot-steps/phase4.json
 npm run screenshot -- --url="?debug=1&shops=test" --reduced-motion --steps=scripts/screenshot-steps/phase4-reduced.json
-npm run screenshot -- --name=trophy-samples --url="dev/trophy-samples.html" --full
 ```
 
 **たまおの確認**：スクリーンショットで、見た目が3月の画面設計のイメージと合っているか。赤黒が「禍々しい」と感じられるか。トロフィーの形の3案からどれにするか。トロフィーが「さりげない」と感じられるか。

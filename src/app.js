@@ -364,7 +364,7 @@ async function main() {
     if (key === state.trophyKey) return;
     state.trophyKey = key;
     const btn = $("trophy");
-    btn.replaceChildren(createTrophyIcon(document, key, undefined, 26));
+    btn.replaceChildren(createTrophyIcon(document, key, 26));
     btn.setAttribute("aria-label", level ? `記録（${level.name}トロフィー）` : "記録");
   }
 
