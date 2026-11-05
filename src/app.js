@@ -856,6 +856,7 @@ async function main() {
 
     if (!p) {
       $("distance").textContent = "—";
+      $("gps-weak").hidden = true;
       return;
     }
 
@@ -888,6 +889,8 @@ async function main() {
     }
 
     $("distance").textContent = formatDistance(d);
+    // 誤差が60mを超えている間は「GPSの精度が下がっています」と小さく出す（5章）。到着の判定と同じ条件
+    $("gps-weak").hidden = !hintProgress(d, p.accuracy).lowAccuracy;
 
     if (temp) {
       // 仮の目的地：到着画面の代わりに表示だけ。記録・トロフィー・点数には関係しない（12章）

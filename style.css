@@ -422,6 +422,12 @@ button {
   color: var(--revisit);
 }
 
+.gps-weak {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
 .temp-label {
   margin: 8px 0 0;
   color: var(--text-muted);

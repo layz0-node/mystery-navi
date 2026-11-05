@@ -37,7 +37,7 @@ test("テスト用のダミー店は検査に通る", async () => {
 
 test("ダミー店は11軒で、2〜3区に分かれ、同じ区に複数の店がある", async () => {
   const { shops } = await loadFixture();
-  // 11軒目（shop_011）は、ほかの店から1km以上離した店。圏外A2（200m以内にしか店がない）を再現するため
+  // 11軒目（shop_901）は、ほかの店から1km以上離した店。圏外A2（200m以内にしか店がない）を再現するため
   assert.equal(shops.length, 11);
   const counts = new Map();
   for (const s of shops) counts.set(s.ward, (counts.get(s.ward) ?? 0) + 1);

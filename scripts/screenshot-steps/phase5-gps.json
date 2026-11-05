@@ -1,0 +1,33 @@
+[
+  { "click": "#debug-toggle" },
+  { "fill": "#dbg-time-input", "value": "2026-11-05T21:00" },
+  { "click": "#dbg-set-time" },
+  { "click": "#dbg-station-0" },
+  { "click": "#debug-toggle" },
+  { "click": "#start-button" },
+  { "wait": 800 },
+  { "shot": "p5g-01-accuracy10" },
+
+  { "click": "#debug-toggle" },
+  { "fill": "#dbg-accuracy", "value": "80" },
+  { "select": "#dbg-warp-shop", "value": "__target" },
+  { "fill": "#dbg-warp-distance", "value": "400" },
+  { "click": "#dbg-warp" },
+  { "click": "#debug-toggle" },
+  { "wait": 300 },
+  { "shot": "p5g-02-accuracy80-400m" },
+
+  { "click": "#debug-toggle" },
+  { "fill": "#dbg-warp-distance", "value": "50" },
+  { "click": "#dbg-warp" },
+  { "click": "#debug-toggle" },
+  { "wait": 300 },
+  { "shot": "p5g-03-accuracy80-50m" },
+
+  { "click": "#debug-toggle" },
+  { "fill": "#dbg-accuracy", "value": "60" },
+  { "click": "#dbg-warp" },
+  { "click": "#debug-toggle" },
+  { "wait": 300 },
+  { "shot": "p5g-04-accuracy60-50m" }
+]
