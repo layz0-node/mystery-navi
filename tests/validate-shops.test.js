@@ -35,9 +35,10 @@ test("テスト用のダミー店は検査に通る", async () => {
   assert.deepEqual(await validateShopsFile(FIXTURE_URL), []);
 });
 
-test("ダミー店は10軒で、2〜3区に分かれ、同じ区に複数の店がある", async () => {
+test("ダミー店は11軒で、2〜3区に分かれ、同じ区に複数の店がある", async () => {
   const { shops } = await loadFixture();
-  assert.equal(shops.length, 10);
+  // 11軒目（shop_011）は、ほかの店から1km以上離した店。圏外A2（200m以内にしか店がない）を再現するため
+  assert.equal(shops.length, 11);
   const counts = new Map();
   for (const s of shops) counts.set(s.ward, (counts.get(s.ward) ?? 0) + 1);
   assert.ok(counts.size >= 2 && counts.size <= 3);

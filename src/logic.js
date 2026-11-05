@@ -11,6 +11,8 @@ import {
   MAX_ACCURACY_FOR_ARRIVAL_M,
   INITIAL_ACCURACY_M,
   INITIAL_FIX_TIMEOUT_SEC,
+  POSITION_FAIL_TIMEOUT_SEC,
+  MAP_SEARCH_URL,
   HEADING_TIMEOUT_SEC,
   MIN_REMAINING_OPEN_MIN,
   UNVISITED_PICK_RATE,
@@ -543,4 +545,158 @@ export function parseJstLocal(text) {
 // Date を日本時間の「YYYY-MM-DDTHH:MM」にする（datetime-local の初期値・表示用）
 export function formatJstLocal(time) {
   return new Date(toMs(time) + JST_OFFSET_MS).toISOString().slice(0, 16);
+}
+
+// ---------- 到着画面・評価（S2） ----------
+
+// 到着画面の評価ボタン。理由を選ぶボタンは reasons を持つ（S2・N2）
+export const RATING_BUTTONS = [
+  { id: "good", label: "お店良かった", value: "good" },
+  { id: "bad", label: "お店悪かった", value: "bad" },
+  {
+    id: "notGo",
+    label: "行かなかった",
+    reasons: [
+      { value: "declined", label: "入る気にならなかった" },
+      { value: "skip", label: "今日はやめておく" },
+    ],
+  },
+  {
+    id: "notOpen",
+    label: "空いてなかった",
+    reasons: [
+      { value: "closed", label: "閉まっていた" },
+      { value: "full", label: "満席・入れなかった" },
+    ],
+  },
+];
+
+// 押したボタンと理由から、記録の値（6種類）。決まらなければ null
+export function ratingValue(buttonId, reasonValue = null) {
+  const b = RATING_BUTTONS.find((x) => x.id === buttonId);
+  if (!b) return null;
+  if (!b.reasons) return reasonValue === null ? b.value : null;
+  return b.reasons.some((r) => r.value === reasonValue) ? reasonValue : null;
+}
+
+// 取り消しのお知らせの文言。理由付きはボタンと理由を「・」でつなぐ（S1）
+export function ratingLabel(value) {
+  for (const b of RATING_BUTTONS) {
+    if (b.value === value) return `『${b.label}』で記録しました`;
+    const r = b.reasons?.find((x) => x.value === value);
+    if (r) return `『${b.label}・${r.label}』で記録しました`;
+  }
+  return "記録しました";
+}
+
+// 「地図で見る」のURL。{query} に「店名 区名」をURLエンコードして入れる（S2・9章）
+export function mapSearchUrl(shop, template = MAP_SEARCH_URL) {
+  const query = [shop?.name, shop?.ward].filter((x) => typeof x === "string" && x !== "").join(" ");
+  return template.split("{query}").join(encodeURIComponent(query));
+}
+
+// 到着画面を出している間に、保持の期限を過ぎたか。到着していない案内先は対象外（false）
+export function arrivalHoldExpired(target, now) {
+  if (!target?.arrivedAt) return false;
+  return !isArrivalHeld(target.arrivedAt, now);
+}
+
+// ---------- 圏外（S3）・エラー（S4） ----------
+
+const OUT_OF_AREA_MESSAGES = {
+  A1: ["近くにシーシャ屋が見つかりませんでした", "東京23区内でお試しください"],
+  A2: ["すぐ近くのお店しか見つかりませんでした", "少し離れてから、また開いてみてください"],
+  B: ["この辺りのお店は、今は案内できません", "少し離れた場所で、また開いてみてください"],
+  C: ["近くのシーシャ屋は今の時間すべて閉まっています", "時間を変えて、また開いてみてください"],
+};
+
+// 圏外の理由（selectShop の result）から、2行のメッセージ → [見出し, 説明]
+export function outOfAreaMessage(code) {
+  return [...(OUT_OF_AREA_MESSAGES[code] ?? OUT_OF_AREA_MESSAGES.A1)];
+}
+
+// 位置を待っている間の状態（S4・4-1）
+// secure：HTTPSなどの安全な接続か。position・positionError：sensors.getState() の値
+// startedAtMs：待ち始めた時刻。nowMs：今の時刻（どちらも実際の時計）
+// → { kind: "ok" }
+//   | { kind: "waiting", slow }  slow：INITIAL_FIX_TIMEOUT_SEC を過ぎた
+//   | { kind: "error", error: "https" | "denied" | "unavailable" | "timeout" }
+// 位置が一度でも届いていれば、エラーや経過時間に関係なく ok
+export function locationGate({ secure = true, position = null, positionError = null, startedAtMs, nowMs }) {
+  if (secure === false) return { kind: "error", error: "https" };
+  if (position) return { kind: "ok" };
+  if (positionError) {
+    if (positionError.code === 1) return { kind: "error", error: "denied" };
+    if (positionError.code === 3) return { kind: "error", error: "timeout" };
+    return { kind: "error", error: "unavailable" };
+  }
+  const elapsed = nowMs - startedAtMs;
+  if (elapsed >= POSITION_FAIL_TIMEOUT_SEC * 1000) return { kind: "error", error: "timeout" };
+  return { kind: "waiting", slow: elapsed >= INITIAL_FIX_TIMEOUT_SEC * 1000 };
+}
+
+// エラー表示（S4）の出し分け → { title, help（許可の方法を出すか）, retry（「もう一度試す」を出すか） }
+export function errorView(kind) {
+  if (kind === "https") return { title: "このページはHTTPSで開いてください", help: false, retry: false };
+  if (kind === "denied") return { title: "位置情報の利用が許可されていません", help: true, retry: true };
+  return { title: "現在地を取得できませんでした", help: false, retry: true };
+}
+
+// 位置を待っている間の文言
+export function waitingText(slow) {
+  return slow ? "時間がかかっています…（空が見える場所だと早く取れます）" : "現在地を確かめています…";
+}
+
+// ---------- 記録パネル（S5） ----------
+
+// 記録パネルに出す値。数はすべて記録から数え、店リストから消えた店の分も含める。
+// 未獲得の段階は名前を「？？？」にする。「次のトロフィーまで」には名前を入れない
+export function recordsPanelModel(visits, levels = TROPHY_LEVELS) {
+  const t = trophySummary(visits, levels);
+  return {
+    level: t.level,
+    count: t.count,
+    countText: `${t.count}回`,
+    nextText: t.isMax ? "最上級" : `あと${t.remaining}回`,
+    levels: levels.map((l) => {
+      const earned = t.count >= l.count;
+      return { id: l.id, earned, name: earned ? l.name : "？？？", countText: `${l.count}回` };
+    }),
+    visitedText: `${t.visitedShops}軒`,
+    goodText: `${t.goodShops}軒`,
+    badText: `${t.badShops}軒`,
+  };
+}
+
+// 読み込みの確認文（11章）
+export function importConfirmText(currentCount, importCount) {
+  return `今の記録（${currentCount}回）を、読み込む記録（${importCount}回）で上書きします。よろしいですか？`;
+}
+
+// 読み込めなかったときの文言（parseBackup・importVisits の reason）
+export function importErrorText(reason) {
+  if (reason === "json") return "読み込めませんでした。書き出した文字列を、そのまま貼り付けてください";
+  if (reason === "app") return "このアプリの記録ではないため、読み込めませんでした";
+  if (reason === "version") return "この版のアプリでは読めない記録のため、読み込めませんでした";
+  if (reason === "backup-failed") return "今の記録を退避できなかったため、読み込みませんでした";
+  return "読めない記録が含まれているため、読み込めませんでした";
+}
+
+// 最後に書き出した日（日本時間の暦の日付）。まだなら「まだ書き出していません」
+export function exportDateLabel(time) {
+  if (time === null || time === undefined) return "まだ書き出していません";
+  const ms = toMs(time);
+  if (!Number.isFinite(ms)) return "まだ書き出していません";
+  const d = new Date(ms + JST_OFFSET_MS);
+  return `${d.getUTCFullYear()}年${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
+}
+
+// 読めない記録があるときの注意（1件以上のときだけ）
+export function unreadableNotice(count) {
+  return count > 0 ? `書き出せない記録が${count}件あります（端末の保存データには残してあります）` : null;
+}
+
+// 記録を保存できていないか（storage.js の status()）
+export function savingFailed(status) {
+  return !status?.saving || Boolean(status?.lastWriteFailed);
 }

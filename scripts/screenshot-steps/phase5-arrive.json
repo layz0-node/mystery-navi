@@ -1,0 +1,178 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_002"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_003"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5a-01-nav"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "50"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5a-02-arrived",
+  "full": true
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-accuracy",
+  "value": "300"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "600"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5a-03-arrived-gps-bad"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-accuracy",
+  "value": "10"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "50"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-06T03:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "1"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5a-04-reload-after-close"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-06T05:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5a-05-hold-expired"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "p5a-06-debug"
+ }
+]

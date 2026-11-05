@@ -1,0 +1,78 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#dbg-station-2"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_007"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_008"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5h-01-arrived-default-hint",
+  "full": true
+ }
+]

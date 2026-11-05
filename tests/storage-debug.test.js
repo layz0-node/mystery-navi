@@ -156,8 +156,8 @@ test("リセットの後に評価する → 新しく保存される", () => {
 // ---------- デバッグの設定 ----------
 
 test("デバッグの設定が壊れたJSON → 上書きなしとして扱う", () => {
-  assert.deepEqual(readDebugSettings("{oops"), { position: null, heading: null, timeOffsetMs: null, tempTarget: null });
-  assert.deepEqual(readDebugSettings("[]"), { position: null, heading: null, timeOffsetMs: null, tempTarget: null });
+  assert.deepEqual(readDebugSettings("{oops"), { position: null, heading: null, timeOffsetMs: null, tempTarget: null, positionFailure: null });
+  assert.deepEqual(readDebugSettings("[]"), { position: null, heading: null, timeOffsetMs: null, tempTarget: null, positionFailure: null });
 });
 
 test("仮の目的地の緯度が90を超える、または数値でない → 受け付けない", () => {
@@ -180,7 +180,7 @@ test("デバッグの設定を保存して読み直す → 同じ値。評価の
     tempTarget: { lat: 35.69, lng: 139.7, color: "bad" },
   };
   saveDebugSettings(storage, settings);
-  assert.deepEqual(loadDebugSettings(storage), { ...settings, heading: 10 });
+  assert.deepEqual(loadDebugSettings(storage), { ...settings, heading: 10, positionFailure: null });
   assert.equal(storage.getItem(STORAGE_KEY), before);
 });
 
@@ -194,4 +194,30 @@ test("デバッグの設定を書けない端末 → 止まらずに、その場
   storage.failWrites = true;
   const s = saveDebugSettings(storage, { heading: 90 });
   assert.equal(s.heading, 90);
+});
+
+// ---------- 位置のエラーの上書き（S4 の再現用） ----------
+
+test("位置のエラーの上書きが5種類のどれか → その値を読み込む", () => {
+  for (const f of ["denied", "unavailable", "timeout", "silent", "insecure"]) {
+    assert.equal(readDebugSettings(JSON.stringify({ positionFailure: f })).positionFailure, f);
+  }
+});
+
+test("位置のエラーの上書きが知らない値や数値 → なし（null）", () => {
+  assert.equal(readDebugSettings(JSON.stringify({ positionFailure: "broken" })).positionFailure, null);
+  assert.equal(readDebugSettings(JSON.stringify({ positionFailure: 1 })).positionFailure, null);
+});
+
+test("位置のエラーの項目がない古い設定 → なしになり、ほかの項目は今までどおり読める", () => {
+  const s = readDebugSettings(JSON.stringify({ heading: 90, timeOffsetMs: 1000 }));
+  assert.equal(s.positionFailure, null);
+  assert.equal(s.heading, 90);
+  assert.equal(s.timeOffsetMs, 1000);
+});
+
+test("位置のエラーの上書きを保存して読み直す → 同じ値", () => {
+  const storage = new MemoryStorage();
+  saveDebugSettings(storage, { positionFailure: "silent" });
+  assert.equal(loadDebugSettings(storage).positionFailure, "silent");
 });

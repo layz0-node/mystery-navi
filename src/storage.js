@@ -227,6 +227,10 @@ export function listStoredEntries(storage) {
 
 const DEBUG_COLORS = ["normal", "mint", "bad"];
 
+// デバッグで起こせる位置のエラー（S4 の再現用）
+// denied：拒否／unavailable：取れない／timeout：タイムアウト／silent：位置もエラーも来ない／insecure：HTTPSでない扱い
+export const DEBUG_POSITION_FAILURES = ["denied", "unavailable", "timeout", "silent", "insecure"];
+
 function isLatLng(p) {
   return (
     isPlainObject(p) &&
@@ -236,7 +240,7 @@ function isLatLng(p) {
 }
 
 export function emptyDebugSettings() {
-  return { position: null, heading: null, timeOffsetMs: null, tempTarget: null };
+  return { position: null, heading: null, timeOffsetMs: null, tempTarget: null, positionFailure: null };
 }
 
 // 保存されたデバッグの設定を読む。読めない項目は「上書きなし」（null）にする
@@ -255,6 +259,7 @@ export function readDebugSettings(raw) {
   }
   if (Number.isFinite(d.heading)) out.heading = ((d.heading % 360) + 360) % 360;
   if (Number.isFinite(d.timeOffsetMs)) out.timeOffsetMs = d.timeOffsetMs;
+  if (DEBUG_POSITION_FAILURES.includes(d.positionFailure)) out.positionFailure = d.positionFailure;
   if (isLatLng(d.tempTarget)) {
     out.tempTarget = {
       lat: d.tempTarget.lat,

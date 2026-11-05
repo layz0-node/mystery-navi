@@ -1,0 +1,109 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "mysteryNavi.test.v1": "{\"schemaVersion\": 1, \"visits\": [{\"shopId\": \"shop_005\", \"value\": \"good\", \"at\": \"2026-11-01T11:00:00Z\"}, {\"shopId\": \"shop_006\", \"value\": \"awful\", \"at\": \"2026-11-02T11:00:00Z\"}, {\"shopId\": \"shop_004\", \"value\": \"good\", \"at\": \"2026-11-03T20:00:00\"}], \"currentTarget\": null, \"trophy\": {\"announcedLevel\": null}, \"lastExportAt\": null}"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#trophy"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5d-01-unreadable",
+  "full": true
+ },
+ {
+  "click": "#records-close"
+ },
+ {
+  "localStorage": {
+   "mysteryNavi.test.v1": "{\"schemaVersion\": 2, \"visits\": []}"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#trophy"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5d-02-not-saving",
+  "full": true
+ },
+ {
+  "click": "#records-close"
+ },
+ {
+  "localStorage": {
+   "mysteryNavi.test.v1": "{oops"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5d-03-recovered"
+ },
+ {
+  "wait": 4500
+ },
+ {
+  "shot": "p5d-04-recovered-gone"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "2"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5d-05-reopened"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "p5d-06-debug"
+ }
+]

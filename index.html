@@ -41,9 +41,13 @@
     </section>
 
     <!-- S1 ナビ画面 -->
-    <section id="screen-nav" class="screen screen-nav" data-color="normal" aria-label="ナビ" hidden>
+    <!-- S1・S3 の上の帯：トロフィー（右上）と一時的なお知らせ（コンパスの上） -->
+    <div id="top-layer" class="top-layer" hidden>
       <button id="trophy" type="button" class="trophy" aria-label="記録"></button>
-      <p id="notice" class="notice" role="status" aria-live="polite"></p>
+      <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    </div>
+
+    <section id="screen-nav" class="screen screen-nav" data-color="normal" aria-label="ナビ" hidden>
 
       <div class="compass" id="compass">
         <svg id="compass-dial" class="compass-dial" viewBox="0 0 200 200" aria-hidden="true">
@@ -87,18 +91,112 @@
       </div>
     </section>
 
-    <!-- S2〜S4 の仮の表示（Phase 5 で作る） -->
-    <section id="screen-other" class="screen screen-other" hidden>
-      <p id="other-title" class="other-title"></p>
-      <p id="other-name" class="other-name"></p>
-      <p id="other-detail" class="other-detail"></p>
-      <p class="other-note">この画面は準備中です</p>
+    <!-- S2 到着画面 -->
+    <section id="screen-arrived" class="screen screen-arrived" aria-labelledby="arrived-name" hidden>
+      <p class="arrived-label">到着しました</p>
+      <h1 id="arrived-name" class="arrived-name"></h1>
+      <p id="arrived-distance" class="arrived-distance">—</p>
+      <ol id="arrived-hints" class="hints hints--arrived" aria-label="ヒント"></ol>
+      <a id="map-link" class="map-link" href="#" target="_blank" rel="noopener noreferrer">地図で見る</a>
+
+      <div id="rating" class="rating" aria-label="評価"></div>
+      <div id="rating-reasons" class="rating-reasons" hidden>
+        <p id="rating-reasons-title" class="rating-reasons-title"></p>
+        <div id="rating-reasons-buttons" class="rating rating--reasons"></div>
+        <button id="rating-back" type="button" class="rating-back">戻る</button>
+      </div>
+
+      <button id="skip-rating" type="button" class="reselect">評価せずに別のお店へ</button>
     </section>
 
-    <!-- 「別のお店にする」の確認 -->
+    <!-- S3 圏外画面（評価の後に位置を待つあいだも、この画面で「探しています」を出す） -->
+    <section id="screen-out" class="screen screen-out" aria-labelledby="out-title" hidden>
+      <svg class="out-mark" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="54" class="dial-ring"/>
+        <circle cx="60" cy="60" r="46" class="dial-ring dial-ring--inner"/>
+        <text x="60" y="18" class="dial-label">N</text>
+      </svg>
+      <p id="out-title" class="out-title"></p>
+      <p id="out-detail" class="out-detail"></p>
+      <button id="out-retry" type="button" class="pill-button">もう一度探す</button>
+      <p id="out-status" class="start-status" role="status"></p>
+    </section>
+
+    <!-- S4 エラー表示 -->
+    <section id="screen-error" class="screen screen-error" aria-labelledby="error-title" hidden>
+      <p id="error-title" class="out-title"></p>
+      <div id="error-help" class="error-help" hidden>
+        <p>位置情報を許可してから、「もう一度試す」を押してください</p>
+        <ul>
+          <li>iPhone：「設定 → プライバシーとセキュリティ → 位置情報サービス」をオンにし、Safari（ホーム画面のアプリなら、このサイト）の位置情報を許可してください</li>
+          <li>Android：アドレスバーの左のアイコン → 権限 → 位置情報を許可してください</li>
+        </ul>
+      </div>
+      <button id="error-retry" type="button" class="pill-button">もう一度試す</button>
+      <p id="error-status" class="start-status" role="status"></p>
+    </section>
+
+    <!-- S5 記録パネル -->
+    <div id="records" class="sheet" role="dialog" aria-modal="true" aria-labelledby="records-title" hidden>
+      <div class="sheet-card">
+        <header class="records-head">
+          <span id="records-icon" class="records-icon"></span>
+          <h2 id="records-title" class="records-title"></h2>
+        </header>
+
+        <dl class="records-stats">
+          <div><dt>到着した回数</dt><dd id="records-count"></dd></div>
+          <div><dt>次のトロフィーまで</dt><dd id="records-next"></dd></div>
+        </dl>
+
+        <ol id="records-levels" class="records-levels" aria-label="トロフィーの一覧"></ol>
+
+        <dl class="records-stats">
+          <div><dt>訪れたお店</dt><dd id="records-visited"></dd></div>
+          <div><dt><span class="records-mark records-mark--good" aria-hidden="true"></span>良いお店</dt><dd id="records-good"></dd></div>
+          <div><dt><span class="records-mark records-mark--bad" aria-hidden="true"></span>悪いお店</dt><dd id="records-bad"></dd></div>
+        </dl>
+
+        <section class="records-backup" aria-labelledby="records-backup-title">
+          <h3 id="records-backup-title">記録のバックアップ</h3>
+          <p id="records-saving" class="records-warn" hidden>この端末では記録を保存できていません</p>
+          <button id="export-button" type="button" class="records-button">書き出す</button>
+          <p id="export-message" class="records-message" role="status"></p>
+          <textarea id="export-text" class="records-text" readonly rows="4" aria-label="書き出した記録" hidden></textarea>
+          <p id="export-date" class="records-note"></p>
+          <p id="records-unreadable" class="records-warn" hidden></p>
+
+          <label for="import-text" class="records-note">読み込む：書き出した文字列を貼り付けてください</label>
+          <textarea id="import-text" class="records-text" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+          <button id="import-button" type="button" class="records-button">読み込む</button>
+          <p id="import-message" class="records-message" role="status"></p>
+        </section>
+
+        <details class="records-help">
+          <summary>矢印の向きがおかしいとき</summary>
+          <p>狂っているかの見分け方：矢印がゆっくり回り続ける。駅など方角のわかる目印と、明らかに違う方向を指す</p>
+          <h4>iPhone</h4>
+          <ol>
+            <li>磁石の入ったものを外す（MagSafeのケースやカードケース、スマホリング、手帳型ケースの留め具など）</li>
+            <li>鉄骨の柱・車・自販機から2mほど離れる。地下や電車の中も狂いやすい</li>
+            <li>スマホを平らに持ち、腕全体でゆっくり大きく「8の字」を10〜15秒描く。最後にゆっくり一回転させる（手首だけの小さく速い動きは効かない）</li>
+            <li>直らなければ「設定 → プライバシーとセキュリティ → 位置情報サービス → システムサービス」の「コンパスの調整」がオンか確認する</li>
+          </ol>
+          <h4>Android</h4>
+          <ol>
+            <li>磁石の入ったものを外し、鉄骨などから離れる</li>
+            <li>Googleマップで現在地の青い点をタップし、「調整」から画面の案内に従って8の字に動かす</li>
+          </ol>
+        </details>
+
+        <button id="records-close" type="button" class="records-close">閉じる</button>
+      </div>
+    </div>
+
+    <!-- 確認（「別のお店にする」「評価せずに別のお店へ」「読み込む」） -->
     <div id="confirm" class="confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-text" hidden>
       <div class="confirm-card">
-        <p id="confirm-text">今のお店をやめて、別のお店を探しますか？</p>
+        <p id="confirm-text"></p>
         <div class="confirm-buttons">
           <button id="confirm-yes" type="button" class="confirm-button confirm-button--primary">探す</button>
           <button id="confirm-no" type="button" class="confirm-button">やめる</button>

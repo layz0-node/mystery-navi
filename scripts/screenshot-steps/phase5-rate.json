@@ -1,0 +1,176 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "fill": "#dbg-bulk-count",
+  "value": "2"
+ },
+ {
+  "select": "#dbg-bulk-value",
+  "value": "good"
+ },
+ {
+  "click": "#dbg-bulk-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_002"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_003"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "50"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "click": ".rating-button--notGo"
+ },
+ {
+  "shot": "p5r-01-reasons-notgo"
+ },
+ {
+  "click": "#rating-back"
+ },
+ {
+  "shot": "p5r-02-back"
+ },
+ {
+  "click": ".rating-button--notOpen"
+ },
+ {
+  "shot": "p5r-03-reasons-notopen"
+ },
+ {
+  "click": "#rating-reasons-buttons .rating-button:first-child"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5r-04-out-undo"
+ },
+ {
+  "click": ".notice-action"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5r-05-undone"
+ },
+ {
+  "click": ".rating-button--good"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5r-06-rated"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "shot": "p5r-07-no-promo-yet"
+ },
+ {
+  "wait": 2600
+ },
+ {
+  "shot": "p5r-08-promo"
+ },
+ {
+  "wait": 6000
+ },
+ {
+  "shot": "p5r-09-promo-stays"
+ },
+ {
+  "click": ".notice-link"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "shot": "p5r-10-export",
+  "full": true
+ },
+ {
+  "click": "#records-close"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5r-11-after-close"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "p5r-12-debug"
+ }
+]

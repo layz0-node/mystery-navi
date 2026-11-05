@@ -1,0 +1,155 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "select": "#dbg-failure",
+  "value": "denied"
+ },
+ {
+  "click": "#dbg-set-failure"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5e-01-denied",
+  "full": true
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-failure",
+  "value": "unavailable"
+ },
+ {
+  "click": "#dbg-set-failure"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#error-retry"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "shot": "p5e-02-unavailable"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-failure",
+  "value": "timeout"
+ },
+ {
+  "click": "#dbg-set-failure"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#error-retry"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "shot": "p5e-03-timeout"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-failure",
+  "value": "insecure"
+ },
+ {
+  "click": "#dbg-set-failure"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#error-retry"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "shot": "p5e-04-https"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-failure",
+  "value": "silent"
+ },
+ {
+  "click": "#dbg-set-failure"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "1"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "shot": "p5e-05-waiting"
+ },
+ {
+  "wait": 8500
+ },
+ {
+  "shot": "p5e-06-slow"
+ },
+ {
+  "wait": 10000
+ },
+ {
+  "shot": "p5e-07-gave-up"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#dbg-clear-failure"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#error-retry"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5e-08-recovered"
+ }
+]

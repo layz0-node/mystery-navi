@@ -1,0 +1,75 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "fill": "#dbg-bulk-count",
+  "value": "4"
+ },
+ {
+  "select": "#dbg-bulk-value",
+  "value": "skip"
+ },
+ {
+  "click": "#dbg-bulk-add"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "click": ".rating-button--good"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5q-01-rated"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "1"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5q-02-promo-after-reload"
+ }
+]

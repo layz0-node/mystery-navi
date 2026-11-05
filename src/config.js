@@ -9,6 +9,7 @@ export const ARRIVAL_RADIUS_M = 100; // 到着とみなす距離
 export const MAX_ACCURACY_FOR_ARRIVAL_M = 60; // 到着判定に使うGPS誤差の上限
 export const INITIAL_ACCURACY_M = 100; // 店を選ぶ前に待つ位置の精度
 export const INITIAL_FIX_TIMEOUT_SEC = 10; // 位置の精度を待つ最大秒数
+export const POSITION_FAIL_TIMEOUT_SEC = 20; // 位置が1回も取れないまま、この秒数たったら S4（タイムアウト）にする
 export const MIN_REMAINING_OPEN_MIN = 75; // 閉店までの残りがこの分数以内の店は選ばない
 export const UNVISITED_PICK_RATE = 0.7; // 両方に候補があるとき、未訪問グループから選ぶ確率（1.0で必ず未訪問）
 export const BAD_PICK_WEIGHT = 0.5; // 訪問済みグループの中で、点数がマイナスの店の選ばれやすさ（他の店は1）
@@ -17,7 +18,7 @@ export const TARGET_TTL_HOURS = 3; // 未到着の案内先を保持する時間
 export const ARRIVAL_MIN_HOLD_HOURS = 3; // 到着画面を保つ最短の時間（到着した日の翌朝5時と、到着からこの時間後の遅いほうまで保つ）
 export const DAY_BOUNDARY_HOUR = 5; // 「同じ日」を切り替える時刻（日本時間）
 export const UNDO_SEC = 5; // 評価を取り消せる秒数
-export const NOTICE_SEC = 4; // 昇格・行き先の変更などのお知らせを表示する秒数
+export const NOTICE_SEC = 4; // 行き先の変更などのお知らせを表示する秒数（昇格のお知らせは×を押すまで出す。取り消しは UNDO_SEC）
 // 「地図で見る」で開くURLの雛形。{query} に「店名 区名」をURLエンコードして入れる
 export const MAP_SEARCH_URL = "https://www.google.com/maps/search/?api=1&query={query}";
 export const HEADING_TIMEOUT_SEC = 3; // 方位センサーを待つ秒数。届かなければ「使えない」扱い。後から届いたら方位ありに戻す

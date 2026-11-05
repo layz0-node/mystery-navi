@@ -18,6 +18,8 @@ const TIME_TESTS = [
   "storage-save.test.js",
   "storage-undo.test.js",
   "storage-backup.test.js",
+  "logic-arrival.test.js",
+  "logic-records.test.js",
 ].map((f) => path.join(testsDir, f));
 
 function envWith(tz) {

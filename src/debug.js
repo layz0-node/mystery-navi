@@ -16,7 +16,7 @@ import {
   trophySummary,
   DEBUG_MAX_BULK_VISITS,
 } from "./logic.js";
-import { listStoredEntries, saveDebugSettings, isValidVisit } from "./storage.js";
+import { listStoredEntries, saveDebugSettings, isValidVisit, DEBUG_POSITION_FAILURES } from "./storage.js";
 
 const STATIONS = [
   { name: "池袋駅", lat: 35.7295, lng: 139.7109 },
@@ -35,6 +35,14 @@ const VALUE_LABELS = {
 };
 
 const COLOR_LABELS = { normal: "通常", mint: "ミント", bad: "赤黒" };
+
+const FAILURE_LABELS = {
+  denied: "拒否された",
+  unavailable: "取れない",
+  timeout: "タイムアウト",
+  silent: "黙り続ける（位置もエラーも来ない）",
+  insecure: "HTTPSでない扱い",
+};
 
 const DIRECTIONS = [
   { label: "北", deg: 0 },
@@ -152,7 +160,12 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
 
   function persist(patch) {
     current = saveDebugSettings(storage, { ...current, ...patch });
-    sensors.setOverrides({ position: current.position, heading: current.heading, timeOffsetMs: current.timeOffsetMs });
+    sensors.setOverrides({
+      position: current.position,
+      heading: current.heading,
+      timeOffsetMs: current.timeOffsetMs,
+      positionFailure: current.positionFailure,
+    });
     render();
     onChange(current);
   }
@@ -231,18 +244,39 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
       ),
     ),
     el("h3", { text: "店の近くへワープ" }),
-    field("店", select("dbg-warp-shop", shopOptions)),
+    field("店", select("dbg-warp-shop", [["__target", "案内中のお店"], ...shopOptions], "__target")),
     field("店からの距離（m）", el("input", { id: "dbg-warp-distance", type: "number", min: "0", step: "10", value: "0" })),
     field("方角", select("dbg-warp-direction", DIRECTIONS.map((d) => [String(d.deg), d.label]), "180")),
     el("div", { class: "debug-buttons" }, [
       button("ワープ", "dbg-warp", () => {
-        const shop = shops.find((s) => s.id === val("dbg-warp-shop"));
-        if (!shop) return say("店がありません");
+        // 「案内中のお店」：どの店が選ばれても、手順ファイルから到着を再現できるように
+        const id = val("dbg-warp-shop") === "__target" ? store.getTarget()?.shopId : val("dbg-warp-shop");
+        const shop = shops.find((s) => s.id === id);
+        if (!shop) return say(val("dbg-warp-shop") === "__target" ? "案内中のお店がありません" : "店がありません");
         const p = offsetPosition(shop, num("dbg-warp-direction"), Math.max(0, num("dbg-warp-distance") || 0));
         document.getElementById("dbg-lat").value = p.lat.toFixed(6);
         document.getElementById("dbg-lng").value = p.lng.toFixed(6);
         persist({ position: { ...p, accuracy: num("dbg-accuracy") || 10 } });
         say(`${shop.name}の近くにワープしました`);
+      }),
+    ]),
+  ]);
+
+  // 位置のエラー（S4 の再現用）
+  const failure = section("位置のエラーを起こす", [
+    el("p", { class: "debug-note", text: "現在地の上書きより優先します。設定してから「はじめる」や「もう一度試す」を押すと、エラー表示になります" }),
+    field(
+      "エラー",
+      select("dbg-failure", DEBUG_POSITION_FAILURES.map((f) => [f, FAILURE_LABELS[f]]), current.positionFailure ?? "denied"),
+    ),
+    el("div", { class: "debug-buttons" }, [
+      button("このエラーにする", "dbg-set-failure", () => {
+        persist({ positionFailure: val("dbg-failure") });
+        say(`位置のエラー：${FAILURE_LABELS[val("dbg-failure")]}にしました`);
+      }),
+      button("エラーをやめる", "dbg-clear-failure", () => {
+        persist({ positionFailure: null });
+        say("位置のエラーをやめました");
       }),
     ]),
   ]);
@@ -397,6 +431,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     message,
     status,
     position,
+    failure,
     heading,
     time,
     temp,
@@ -427,7 +462,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     const s = sensors.getState();
     const p = s.position;
     setText("dbg-position", p ? `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}（誤差 ${Math.round(p.accuracy)}m）` : s.positionError ? `取得できません（${s.positionError.message || s.positionError.code}）` : "未取得");
-    setText("dbg-position-source", p ? SOURCE_LABELS[p.source] : "—");
+    setText("dbg-position-source", current.positionFailure ? `エラーを起こしています（${FAILURE_LABELS[current.positionFailure]}）` : p ? SOURCE_LABELS[p.source] : "—");
     setText("dbg-heading-status", `${HEADING_STATUS_LABELS[s.headingStatus] ?? s.headingStatus}${s.headingSource ? `（${SOURCE_LABELS[s.headingSource] ?? s.headingSource}）` : ""}`);
     setText("dbg-heading-raw", fmtDeg(s.rawHeading));
     setText("dbg-heading-smooth", fmtDeg(s.heading));
@@ -494,6 +529,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
   renderReducedMotion();
 
   sensors.subscribe(render);
-  setInterval(() => setText("dbg-time", `${fmtJst(sensors.now())}${sensors.getState().timeOverridden ? "（上書き中）" : ""}`), 1000);
+  // 評価や取り消しで記録・案内先が変わっても追いつくように、いまの値を1秒ごとに描き直す
+  setInterval(render, 1000);
   refresh();
 }

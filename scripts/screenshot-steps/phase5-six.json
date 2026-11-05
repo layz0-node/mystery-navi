@@ -1,0 +1,357 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-1a-arrived"
+ },
+ {
+  "click": ".rating-button--good"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-1b-next"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-06T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "1"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-2a-arrived"
+ },
+ {
+  "click": ".rating-button--bad"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-2b-next"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-07T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "2"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-3a-arrived"
+ },
+ {
+  "click": ".rating-button--notGo"
+ },
+ {
+  "click": "#rating-reasons-buttons .rating-button:first-child"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-3b-next"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-09T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "3"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-4a-arrived"
+ },
+ {
+  "click": ".rating-button--notGo"
+ },
+ {
+  "click": "#rating-reasons-buttons .rating-button:last-child"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-4b-next"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-10T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "4"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-5a-arrived"
+ },
+ {
+  "click": ".rating-button--notOpen"
+ },
+ {
+  "click": "#rating-reasons-buttons .rating-button:last-child"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-5b-next"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-11T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "localStorage": {
+   "p5-reload": "5"
+  }
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "__target"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "30"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-6a-arrived"
+ },
+ {
+  "click": ".rating-button--notOpen"
+ },
+ {
+  "click": "#rating-reasons-buttons .rating-button:first-child"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "p5six-6b-next"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "p5six-9-debug"
+ }
+]

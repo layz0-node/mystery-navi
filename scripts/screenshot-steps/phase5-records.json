@@ -1,0 +1,231 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T21:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_001"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "good"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-01T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_002"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "bad"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-02T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_003"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "declined"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-03T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_004"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-04T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_005"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "closed"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-10-20T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_006"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "full"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-10-21T20:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#trophy"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5p-01-panel",
+  "full": true
+ },
+ {
+  "click": ".records-help summary"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5p-02-help",
+  "full": true
+ },
+ {
+  "click": "#export-button"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "shot": "p5p-03-exported",
+  "full": true
+ },
+ {
+  "click": "#records-close"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#dbg-reset"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "click": "#trophy"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5p-04-after-reset",
+  "full": true
+ },
+ {
+  "fill": "#import-text",
+  "value": "{\"app\":\"other\"}"
+ },
+ {
+  "click": "#import-button"
+ },
+ {
+  "shot": "p5p-05-import-error",
+  "full": true
+ },
+ {
+  "fill": "#import-text",
+  "value": "\n  {\"app\": \"mystery-navi\", \"schemaVersion\": 1, \"exportedAt\": \"2026-11-05T12:00:00.000Z\", \"visits\": [{\"shopId\": \"shop_001\", \"value\": \"good\", \"at\": \"2026-11-01T11:00:00.000Z\"}, {\"shopId\": \"shop_002\", \"value\": \"bad\", \"at\": \"2026-11-02T11:00:00.000Z\"}, {\"shopId\": \"shop_003\", \"value\": \"declined\", \"at\": \"2026-11-03T11:00:00.000Z\"}, {\"shopId\": \"shop_004\", \"value\": \"skip\", \"at\": \"2026-11-04T11:00:00.000Z\"}, {\"shopId\": \"shop_005\", \"value\": \"closed\", \"at\": \"2026-10-20T11:00:00.000Z\"}, {\"shopId\": \"shop_006\", \"value\": \"full\", \"at\": \"2026-10-21T11:00:00.000Z\"}]}\n"
+ },
+ {
+  "click": "#import-button"
+ },
+ {
+  "shot": "p5p-06-import-confirm"
+ },
+ {
+  "click": "#confirm-yes"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5p-07-imported",
+  "full": true
+ },
+ {
+  "click": "#records-close"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5p-08-back-to-start"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5p-09-nav-no-promo"
+ },
+ {
+  "click": "#trophy"
+ },
+ {
+  "wait": 200
+ },
+ {
+  "shot": "p5p-10-panel-restored",
+  "full": true
+ }
+]

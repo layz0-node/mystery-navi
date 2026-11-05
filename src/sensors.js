@@ -21,10 +21,12 @@ export function readScreenAngle(env = globalThis) {
 }
 
 // env：window の代わり（テストやデバッグで差し替えられるように）
-// overrides：デバッグの上書き { position: { lat, lng, accuracy } | null, heading: number | null, timeOffsetMs: number | null }
+// overrides：デバッグの上書き { position: { lat, lng, accuracy } | null, heading: number | null, timeOffsetMs: number | null,
+//   positionFailure: "denied" | "unavailable" | "timeout" | "silent" | "insecure" | null }
+// positionFailure があるときは、位置の上書きより優先して、そのエラーを起こす（S4 の再現用）
 export function createSensors({ env = globalThis, overrides = null } = {}) {
   const listeners = new Set();
-  let ov = { position: null, heading: null, timeOffsetMs: null, ...(overrides ?? {}) };
+  let ov = { position: null, heading: null, timeOffsetMs: null, positionFailure: null, ...(overrides ?? {}) };
 
   // 位置
   let positionWanted = false;
@@ -58,7 +60,19 @@ export function createSensors({ env = globalThis, overrides = null } = {}) {
 
   // ---------- 位置 ----------
 
+  // デバッグで起こす位置のエラー（code は GeolocationPositionError と同じ）
+  const FAILURE_ERRORS = {
+    denied: { code: 1, message: "デバッグ：拒否" },
+    unavailable: { code: 2, message: "デバッグ：取れない" },
+    timeout: { code: 3, message: "デバッグ：タイムアウト" },
+  };
+
+  function failing() {
+    return ov.positionFailure !== null && ov.positionFailure !== undefined;
+  }
+
   function effectivePosition() {
+    if (failing()) return null;
     if (ov.position) return { ...ov.position, source: "debug" };
     if (realPosition) return { ...realPosition, source: "gps" };
     return null;
@@ -73,7 +87,7 @@ export function createSensors({ env = globalThis, overrides = null } = {}) {
 
   // 上書きがあるあいだは、実際の位置情報を取りに行かない
   function syncWatch() {
-    if (!positionWanted || ov.position) {
+    if (!positionWanted || ov.position || failing()) {
       stopWatch();
       return;
     }
@@ -106,6 +120,27 @@ export function createSensors({ env = globalThis, overrides = null } = {}) {
   function startPosition() {
     positionWanted = true;
     syncWatch();
+  }
+
+  // 位置の監視を止めてから始め直す（S4 の「もう一度試す」）。前のエラーは消す。届いていた位置は残す
+  function restartPosition() {
+    stopWatch();
+    positionError = null;
+    positionWanted = true;
+    syncWatch();
+    emit();
+  }
+
+  function currentPositionError() {
+    if (failing()) return FAILURE_ERRORS[ov.positionFailure] ?? null;
+    return ov.position ? null : positionError;
+  }
+
+  // 位置情報を使える接続か。デバッグで位置を上書きしているときは、接続に関係なく使える
+  function secureContext() {
+    if (ov.positionFailure === "insecure") return false;
+    if (ov.position) return true;
+    return env.isSecureContext !== false;
   }
 
   // 誤差が INITIAL_ACCURACY_M 以下になるまで、最大 INITIAL_FIX_TIMEOUT_SEC 秒待つ（4-1）
@@ -209,7 +244,8 @@ export function createSensors({ env = globalThis, overrides = null } = {}) {
     const debugHeading = Number.isFinite(ov.heading);
     return {
       position: effectivePosition(),
-      positionError: ov.position ? null : positionError,
+      positionError: currentPositionError(),
+      secureContext: secureContext(),
       positionWanted,
       heading: debugHeading ? ov.heading : smoothed,
       rawHeading: debugHeading ? ov.heading : rawHeading,
@@ -223,6 +259,7 @@ export function createSensors({ env = globalThis, overrides = null } = {}) {
   return {
     now,
     startPosition,
+    restartPosition,
     waitInitialFix,
     startHeading,
     getState,

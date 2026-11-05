@@ -1,0 +1,131 @@
+[
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "fill": "#dbg-time-input",
+  "value": "2026-11-05T16:00"
+ },
+ {
+  "click": "#dbg-set-time"
+ },
+ {
+  "click": "#dbg-station-3"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#start-button"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5o-01-A1"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-warp-shop",
+  "value": "shop_011"
+ },
+ {
+  "fill": "#dbg-warp-distance",
+  "value": "100"
+ },
+ {
+  "click": "#dbg-warp"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#out-retry"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5o-02-A2"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#dbg-station-0"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_002"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T15:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#out-retry"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5o-03-C"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_001"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T15:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "select": "#dbg-one-shop",
+  "value": "shop_003"
+ },
+ {
+  "select": "#dbg-one-value",
+  "value": "skip"
+ },
+ {
+  "fill": "#dbg-one-time",
+  "value": "2026-11-05T15:00"
+ },
+ {
+  "click": "#dbg-one-add"
+ },
+ {
+  "click": "#debug-toggle"
+ },
+ {
+  "click": "#out-retry"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "p5o-04-B"
+ }
+]

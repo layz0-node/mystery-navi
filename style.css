@@ -179,11 +179,29 @@ button {
   line-height: 1.8;
 }
 
+#app {
+  position: relative;
+}
+
+/* ---------- S1・S3 の上の帯（トロフィーとお知らせ） ---------- */
+.top-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.top-layer > * {
+  pointer-events: auto;
+}
+
 /* ---------- S1 ナビ画面 ---------- */
 .screen-nav {
   --arrow-color: var(--accent);
   position: relative;
-  padding-top: calc(env(safe-area-inset-top) + 56px);
+  padding-top: calc(env(safe-area-inset-top) + 96px);
 }
 
 .screen-nav[data-color="mint"] {
@@ -221,23 +239,71 @@ button {
   filter: drop-shadow(0 0 3px rgba(244, 241, 255, 0.55));
 }
 
-/* 一時的なお知らせ（コンパスの上） */
+/* 一時的なお知らせ（コンパスの上。S3 でも同じ位置） */
 .notice {
-  margin: 0;
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 56px);
+  left: 16px;
+  right: 16px;
+  max-width: 400px;
+  margin: 0 auto;
   min-height: 40px;
-  padding: 0 16px;
+  padding: 4px 8px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  gap: 4px 10px;
   text-align: center;
   color: var(--text);
   font-size: 13px;
+  line-height: 1.5;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
+.notice:not(.is-visible) {
+  pointer-events: none;
+}
+
 .notice.is-visible {
   opacity: 1;
+}
+
+/* 昇格のお知らせ（×を押すまで出す） */
+.notice--card {
+  padding: 8px 6px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+}
+
+.notice-action {
+  padding: 4px 14px;
+  border: 1px solid rgba(200, 184, 154, 0.45);
+  border-radius: 999px;
+  background: rgba(200, 184, 154, 0.08);
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.notice-link {
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.notice-close {
+  padding: 2px 8px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
 }
 
 /* コンパス */
@@ -422,11 +488,11 @@ button {
   text-underline-offset: 3px;
 }
 
-/* 「別のお店にする」の確認 */
+/* 確認（「別のお店にする」「評価せずに別のお店へ」「読み込む」） */
 .confirm {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 30;
   display: grid;
   place-items: center;
   padding: 16px;
@@ -469,35 +535,407 @@ button {
   color: var(--accent);
 }
 
-/* ---------- S2〜S4 の仮の表示（Phase 5 で作る） ---------- */
-.screen-other {
-  justify-content: center;
-  gap: 12px;
+/* ---------- S2 到着画面 ---------- */
+.screen-arrived {
+  padding-top: calc(env(safe-area-inset-top) + 40px);
   text-align: center;
 }
 
-.screen-other p {
+.arrived-label {
   margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: 0.2em;
 }
 
-.other-title {
+.arrived-name {
+  margin: 10px 0 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.arrived-distance {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
   font-size: 16px;
 }
 
-.other-name {
-  font-size: 20px;
-  font-weight: 500;
+.hints--arrived {
+  max-width: 400px;
+  margin-top: 20px;
+  text-align: left;
 }
 
-.other-detail {
+.hint-label {
+  flex: none;
+  min-width: 4em;
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.8;
+}
+
+.hint-text {
+  overflow-wrap: anywhere;
+}
+
+.map-link {
+  margin-top: 16px;
+  padding: 8px 20px;
+  border: 1px solid rgba(200, 184, 154, 0.35);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.rating {
+  width: 100%;
+  max-width: 400px;
+  margin-top: auto;
+  padding-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.rating-button {
+  --c: var(--accent);
+  padding: 14px 8px;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  color: var(--c);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.rating-button--good { --c: var(--good); }
+.rating-button--bad { --c: var(--bad); }
+.rating-button--notGo { --c: var(--skip); }
+.rating-button--notOpen { --c: var(--closed); }
+
+.rating-reasons {
+  width: 100%;
+  max-width: 400px;
+  margin-top: auto;
+  padding-top: 24px;
+  display: grid;
+  gap: 10px;
+}
+
+.rating-reasons .rating {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.rating-reasons-title {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.rating-back {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.screen-arrived .reselect {
+  margin-top: 12px;
+}
+
+/* ---------- S3 圏外画面・S4 エラー表示 ---------- */
+.screen-out,
+.screen-error {
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.out-mark {
+  width: 96px;
+  height: 96px;
+  opacity: 0.6;
+}
+
+.out-title {
+  margin: 0;
+  max-width: 360px;
+  font-size: 14px;
+  line-height: 1.7;
+  text-wrap: balance;
+}
+
+.out-detail {
+  margin: -8px 0 0;
+  max-width: 340px;
   color: var(--text-muted);
   font-size: 12px;
   line-height: 1.7;
 }
 
-.other-note {
+.pill-button {
+  min-width: 168px;
+  padding: 12px 28px;
+  border: 1px solid rgba(200, 184, 154, 0.45);
+  border-radius: 999px;
+  background: rgba(200, 184, 154, 0.06);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+}
+
+.pill-button:disabled {
+  opacity: 0.5;
+}
+
+.screen-out .start-status,
+.screen-error .start-status {
+  margin: 0;
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+.error-help {
+  width: 100%;
+  max-width: 340px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: left;
+}
+
+.error-help p {
+  margin: 0;
+}
+
+.error-help ul {
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+}
+
+/* ---------- S5 記録パネル ---------- */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 25; /* デバッグの開閉ボタン（20）より前、確認（30）より後ろ */
+  overflow-y: auto;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px);
+  background: rgba(10, 10, 15, 0.86);
+}
+
+.sheet-card {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px 16px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface2);
+  font-size: 13px;
+}
+
+.records-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.records-icon {
+  display: grid;
+  place-items: center;
+}
+
+.records-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.records-stats {
+  margin: 16px 0 0;
+  display: grid;
+  gap: 6px;
+}
+
+.records-stats > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.records-stats dt {
+  color: var(--text-muted);
+}
+
+.records-stats dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+.records-levels {
+  margin: 16px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.records-level {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 10px;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
+}
+
+.records-level--earned {
+  color: var(--text);
+}
+
+.records-level-count {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.records-mark {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.records-mark--good {
+  background: var(--revisit);
+}
+
+.records-mark--bad {
+  background: linear-gradient(var(--cursed), var(--cursed-deep));
+  box-shadow: 0 0 4px rgba(214, 24, 48, 0.8);
+}
+
+.records-backup {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 8px;
+}
+
+.records-backup h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.records-button {
+  padding: 10px;
+  border: 1px solid rgba(200, 184, 154, 0.35);
+  border-radius: 8px;
+  background: rgba(200, 184, 154, 0.06);
+  color: var(--accent);
+}
+
+.records-message {
+  margin: 0;
+  color: var(--revisit);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.records-message:empty {
+  display: none;
+}
+
+.records-message--error {
+  color: var(--bad);
+}
+
+.records-text {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 16px; /* iPhone で入力時に拡大されないように */
+  resize: vertical;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.records-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+label.records-note {
+  margin-top: 8px;
+}
+
+.records-warn {
+  margin: 0;
+  color: var(--bad);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.records-help {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.records-help summary {
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.records-help p {
+  margin: 10px 0 0;
+}
+
+.records-help h4 {
+  margin: 10px 0 4px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.records-help ol {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.records-close {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-muted);
 }
 
 /* ---------- デバッグの開閉ボタン（?debug=1 のときだけ） ---------- */
