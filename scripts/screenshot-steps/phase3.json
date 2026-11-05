@@ -1,0 +1,46 @@
+[
+  { "shot": "p3-1-initial", "full": true },
+
+  { "fill": "#dbg-lat", "value": "35.7280" },
+  { "fill": "#dbg-lng", "value": "139.7100" },
+  { "fill": "#dbg-accuracy", "value": "150" },
+  { "click": "#dbg-set-position" },
+  { "fill": "#dbg-heading", "value": "135" },
+  { "fill": "#dbg-time-input", "value": "2026-11-05T21:00" },
+  { "click": "#dbg-set-time" },
+  { "click": "#dbg-start-sensors" },
+  { "click": "#dbg-wait-fix" },
+  { "wait": 6000 },
+  { "wait": 4800 },
+  { "shot": "p3-2-changed" },
+
+  { "select": "#dbg-one-shop", "value": "shop_002" },
+  { "select": "#dbg-one-value", "value": "closed" },
+  { "fill": "#dbg-one-time", "value": "2026-11-05T20:30" },
+  { "click": "#dbg-one-add" },
+  { "fill": "#dbg-bulk-count", "value": "5" },
+  { "click": "#dbg-bulk-add" },
+  { "shot": "p3-3-visits", "full": true },
+
+  { "click": "#dbg-station-0" },
+  { "fill": "#dbg-temp-lat", "value": "35.6896" },
+  { "fill": "#dbg-temp-lng", "value": "139.7006" },
+  { "select": "#dbg-temp-color", "value": "bad" },
+  { "click": "#dbg-set-temp" },
+  { "shot": "p3-4-temp", "full": true },
+
+  { "select": "#dbg-warp-shop", "value": "shop_003" },
+  { "fill": "#dbg-warp-distance", "value": "0" },
+  { "click": "#dbg-warp" },
+  { "fill": "#dbg-temp-lat", "value": "35.7295" },
+  { "fill": "#dbg-temp-lng", "value": "139.7109" },
+  { "click": "#dbg-station-0" },
+  { "fill": "#dbg-accuracy", "value": "10" },
+  { "click": "#dbg-set-position" },
+  { "click": "#dbg-set-temp" },
+  { "shot": "p3-5-temp-arrived", "full": true },
+
+  { "localStorage": { "mysteryNavi.v1": "{\"schemaVersion\": \"壊れたデータ\"" } },
+  { "click": "#dbg-reset" },
+  { "shot": "p3-6-stored", "full": true }
+]

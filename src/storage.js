@@ -2,7 +2,8 @@
 // （requirements.md 4-3・4-4・6章・11章）。
 //
 // 守っていること
-// - 評価の記録（visits）を消すのは、取り消し（直前の1件・5秒以内）と、記録の読み込みだけ（6章）
+// - 評価の記録（visits）を消すのは、取り消し（直前の1件・5秒以内）と、記録の読み込みと、デバッグのリセットだけ（6章）
+// - 記録の読み込みとデバッグのリセットは、前の保存データをそのまま別のキーに退避してから行う
 // - 端末の保存データは、読めない記録や知らない項目も含めて、元の形のまま書き戻す
 // - 壊れた保存データは、別のキーにそのまま退避してから空で始める。退避できなければ保存しない
 // - 新しい版（schemaVersion が 1 より大きい）の保存データには、退避も上書きもしない
@@ -14,6 +15,10 @@ import { trophySummary } from "./logic.js";
 export const BACKUP_APP = "mystery-navi";
 export const BROKEN_KEY_PREFIX = `${STORAGE_KEY}.broken.`;
 export const BEFORE_IMPORT_KEY_PREFIX = `${STORAGE_KEY}.beforeImport.`;
+export const BEFORE_RESET_KEY_PREFIX = `${STORAGE_KEY}.beforeReset.`;
+const ASIDE_KEY_PREFIXES = [BROKEN_KEY_PREFIX, BEFORE_IMPORT_KEY_PREFIX, BEFORE_RESET_KEY_PREFIX];
+// デバッグの設定（12章）。評価の記録とは別のキー。schemaVersion 1 の保存データには入れない
+export const DEBUG_KEY = "mysteryNavi.debug";
 const MAX_SHOP_ID_LENGTH = 64;
 const MAX_HINTS = 2;
 
@@ -148,6 +153,95 @@ export function getLocalStorage() {
     s.setItem(probe, "1");
     s.removeItem(probe);
     return s;
+  } catch {
+    return null;
+  }
+}
+
+// 保存データの本体と、退避したデータ（broken・beforeImport・beforeReset）を、加工しない文字列のまま返す（12章）。
+// 読むだけ。ほかのキー（デバッグの設定など）は含めない
+// → [{ key, raw, kind: "main" | "broken" | "beforeImport" | "beforeReset" }]
+export function listStoredEntries(storage) {
+  if (!storage) return [];
+  const keys = [];
+  try {
+    for (let i = 0; i < storage.length; i++) keys.push(storage.key(i));
+  } catch {
+    return [];
+  }
+  const entries = [];
+  const main = storage.getItem(STORAGE_KEY);
+  if (main !== null) entries.push({ key: STORAGE_KEY, raw: main, kind: "main" });
+  const kinds = { [BROKEN_KEY_PREFIX]: "broken", [BEFORE_IMPORT_KEY_PREFIX]: "beforeImport", [BEFORE_RESET_KEY_PREFIX]: "beforeReset" };
+  for (const key of keys.filter((k) => typeof k === "string").sort()) {
+    const prefix = ASIDE_KEY_PREFIXES.find((p) => key.startsWith(p));
+    if (!prefix) continue;
+    const raw = storage.getItem(key);
+    if (raw !== null) entries.push({ key, raw, kind: kinds[prefix] });
+  }
+  return entries;
+}
+
+// ---------- デバッグの設定（12章） ----------
+
+const DEBUG_COLORS = ["normal", "mint", "bad"];
+
+function isLatLng(p) {
+  return (
+    isPlainObject(p) &&
+    Number.isFinite(p.lat) && p.lat >= -90 && p.lat <= 90 &&
+    Number.isFinite(p.lng) && p.lng >= -180 && p.lng <= 180
+  );
+}
+
+export function emptyDebugSettings() {
+  return { position: null, heading: null, timeOffsetMs: null, tempTarget: null };
+}
+
+// 保存されたデバッグの設定を読む。読めない項目は「上書きなし」（null）にする
+export function readDebugSettings(raw) {
+  const out = emptyDebugSettings();
+  let d;
+  try {
+    d = JSON.parse(raw);
+  } catch {
+    return out;
+  }
+  if (!isPlainObject(d)) return out;
+  if (isLatLng(d.position)) {
+    const accuracy = Number.isFinite(d.position.accuracy) && d.position.accuracy >= 0 ? d.position.accuracy : 10;
+    out.position = { lat: d.position.lat, lng: d.position.lng, accuracy };
+  }
+  if (Number.isFinite(d.heading)) out.heading = ((d.heading % 360) + 360) % 360;
+  if (Number.isFinite(d.timeOffsetMs)) out.timeOffsetMs = d.timeOffsetMs;
+  if (isLatLng(d.tempTarget)) {
+    out.tempTarget = {
+      lat: d.tempTarget.lat,
+      lng: d.tempTarget.lng,
+      color: DEBUG_COLORS.includes(d.tempTarget.color) ? d.tempTarget.color : "normal",
+    };
+  }
+  return out;
+}
+
+// → 保存した設定（読み直したもの）。書けなくても止めない
+export function saveDebugSettings(storage, settings) {
+  const clean = readDebugSettings(JSON.stringify(settings));
+  if (storage) {
+    try {
+      storage.setItem(DEBUG_KEY, JSON.stringify(clean));
+    } catch {
+      // 保存できない端末では、その場かぎりの設定として使う
+    }
+  }
+  return clean;
+}
+
+export function loadDebugSettings(storage) {
+  if (!storage) return null;
+  try {
+    const raw = storage.getItem(DEBUG_KEY);
+    return raw === null ? null : readDebugSettings(raw);
   } catch {
     return null;
   }
@@ -396,6 +490,42 @@ export function createStore({ storage = null, now = new Date() } = {}) {
         d.currentTarget = null;
         setAnnounced(d, level ? level.id : null);
       });
+      lastAdd = null;
+      return { ok: true, backupKey };
+    },
+
+    // ---------- デバッグ用（12章）。?debug=1 のパネルからだけ使う ----------
+
+    // 記録を末尾に追加するだけ。案内先は消さず、取り消しの対象にもしない
+    debugAppendVisits(visits) {
+      if (!Array.isArray(visits) || !visits.every(isValidVisit)) {
+        throw new TypeError("記録できない評価が含まれています");
+      }
+      mutate((d) => {
+        for (const v of visits) d.visits.push(pickVisit(v));
+      });
+      return visits.length;
+    },
+
+    // 初めて開いた状態に戻す。前に、今の保存データをそのまま beforeReset に退避する。
+    // 退避できなければ何も変えない。退避したデータ（broken・beforeImport・beforeReset）は消さない
+    // → { ok: true, backupKey } | { ok: false, reason: "backup-failed" }
+    debugReset(now) {
+      let backupKey = null;
+      if (storage !== null) {
+        try {
+          const raw = readRaw();
+          if (raw !== null) backupKey = writeAside(BEFORE_RESET_KEY_PREFIX, raw, now);
+          storage.removeItem(STORAGE_KEY);
+        } catch {
+          return { ok: false, reason: "backup-failed" };
+        }
+        saving = true;
+        reason = null;
+        recoveredKey = null;
+        lastWriteFailed = false;
+      }
+      data = emptyData();
       lastAdd = null;
       return { ok: true, backupKey };
     },

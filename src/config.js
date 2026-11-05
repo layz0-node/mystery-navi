@@ -20,7 +20,8 @@ export const UNDO_SEC = 5; // 評価を取り消せる秒数
 export const NOTICE_SEC = 4; // 昇格・行き先の変更などのお知らせを表示する秒数
 // 「地図で見る」で開くURLの雛形。{query} に「店名 区名」をURLエンコードして入れる
 export const MAP_SEARCH_URL = "https://www.google.com/maps/search/?api=1&query={query}";
-export const DECLINATION_DEG = 0; // 磁北と真北のずれの補正（東京は西に約7度）。実機で必要と分かったら設定する
+export const HEADING_TIMEOUT_SEC = 3; // 方位センサーを待つ秒数。届かなければ「使えない」扱い。後から届いたら方位ありに戻す
+export const DECLINATION_DEG = 0; // 磁北と真北のずれの補正。西はマイナス（東京は西に約7度なので −7）。実機で必要と分かったら設定する
 
 // 日本時間（UTC+9）。時刻の判定はすべてこの時差で行い、端末のタイムゾーンに頼らない（requirements.md T4）
 export const JST_OFFSET_MIN = 9 * 60;

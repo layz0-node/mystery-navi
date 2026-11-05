@@ -9,6 +9,9 @@ import {
   HINT2_RADIUS_M,
   ARRIVAL_RADIUS_M,
   MAX_ACCURACY_FOR_ARRIVAL_M,
+  INITIAL_ACCURACY_M,
+  INITIAL_FIX_TIMEOUT_SEC,
+  HEADING_TIMEOUT_SEC,
   MIN_REMAINING_OPEN_MIN,
   UNVISITED_PICK_RATE,
   BAD_PICK_WEIGHT,
@@ -323,4 +326,170 @@ export function trophySummary(visits, levels = TROPHY_LEVELS) {
     goodShops,
     badShops,
   };
+}
+
+// ---------- 方位センサー（10章） ----------
+
+// 平滑化の強さ（0〜1）。新しい値にどれだけ寄せるか。大きいほど速く追い、ブレも残る
+export const HEADING_SMOOTHING = 0.25;
+
+// 角度を 0以上360未満にそろえる
+export function normalizeDeg(deg) {
+  const d = deg % 360;
+  return d < 0 ? d + 360 : d + 0; // -0 を 0 にする
+}
+
+// from から to への最短の角度差（-180より大きく180以下）
+export function angleDiff(from, to) {
+  const d = normalizeDeg(to - from);
+  return d > 180 ? d - 360 : d;
+}
+
+// センサーの値から、画面の上が向いている方位（磁北基準・時計回り）を出す。
+// reading.compass：iPhone の webkitCompassHeading（端末の上端の方位）
+// reading.alpha：Android の deviceorientationabsolute の alpha（反時計回り）→ 360 - alpha
+// screenAngle：画面の回転角（screen.orientation.angle。古いiPhoneの window.orientation は -90 もある）。
+//   端末を反時計回りに回した角度なので、その分だけ足すと画面の上の方位になる
+// 値がなければ null
+export function headingFromReading(reading, screenAngle = 0) {
+  const angle = Number.isFinite(screenAngle) ? screenAngle : 0;
+  const { compass, alpha } = reading ?? {};
+  let base = null;
+  if (Number.isFinite(compass) && compass >= 0) base = compass;
+  else if (Number.isFinite(alpha)) base = 360 - alpha;
+  if (base === null) return null;
+  return normalizeDeg(base + angle);
+}
+
+// 矢印の角度 ＝ 店への方位角 −（端末の方位 ＋ 磁北の補正）
+export function arrowAngle(bearing, heading, declination = 0) {
+  return normalizeDeg(bearing - (heading + declination));
+}
+
+// 円の上で平滑化する。最短の差の分だけ寄せるので、359度と0度の境目で一回転しない
+export function smoothHeading(prev, raw, factor = HEADING_SMOOTHING) {
+  if (raw === null || raw === undefined || !Number.isFinite(raw)) return prev ?? null;
+  if (prev === null || prev === undefined || !Number.isFinite(prev)) return normalizeDeg(raw);
+  return normalizeDeg(prev + angleDiff(prev, raw) * factor);
+}
+
+// 矢印を CSS で回すときの連続した角度。前に表示した角度から最短で回る値を返す
+// （350 → 10 なら 370。-340 にすると逆回りに一回転してしまう）
+export function unwrapAngle(prevShown, next) {
+  if (prevShown === null || prevShown === undefined || !Number.isFinite(prevShown)) return normalizeDeg(next);
+  return prevShown + angleDiff(prevShown, next);
+}
+
+// 方位センサーの状態（HEADING_TIMEOUT_SEC 秒待っても値が来なければ「使えない」）
+// state：{ status: "waiting" | "active" | "unavailable" | "denied", startedAtMs }
+// event：{ type: "value", heading, atMs } | { type: "tick", atMs } | { type: "denied" }
+// 「使えない」「拒否」の後でも、有効な値が届いたら「方位あり」に切り替える
+export function headingStatusStart(atMs) {
+  return { status: "waiting", startedAtMs: atMs };
+}
+
+export function nextHeadingStatus(state, event, timeoutSec = HEADING_TIMEOUT_SEC) {
+  if (event.type === "value") {
+    if (!Number.isFinite(event.heading)) return state;
+    return state.status === "active" ? state : { ...state, status: "active" };
+  }
+  if (event.type === "denied") return { ...state, status: "denied" };
+  if (event.type === "tick") {
+    if (state.status === "waiting" && event.atMs - state.startedAtMs >= timeoutSec * 1000) {
+      return { ...state, status: "unavailable" };
+    }
+  }
+  return state;
+}
+
+// ---------- 最初の位置の精度待ち（4-1） ----------
+
+// state：{ startedAtMs, best, timedOut, done, result }
+// event：{ type: "fix", fix: { lat, lng, accuracy }, atMs } | { type: "tick", atMs }
+// 誤差が INITIAL_ACCURACY_M 以下になったら確定。
+// INITIAL_FIX_TIMEOUT_SEC 秒たったら、それまでで一番誤差の小さい位置で確定し、lowAccuracy を立てる。
+// 1回も位置が来ていなければ待ち続け、最初に来た位置で確定する（S4 への切り替えは Phase 5 で決める）
+export function initialFixStart(atMs) {
+  return { startedAtMs: atMs, best: null, timedOut: false, done: false, result: null };
+}
+
+function accuracyOf(fix) {
+  return Number.isFinite(fix?.accuracy) && fix.accuracy >= 0 ? fix.accuracy : Infinity;
+}
+
+function finishFix(state, fix) {
+  return {
+    ...state,
+    best: fix,
+    done: true,
+    result: { position: fix, lowAccuracy: accuracyOf(fix) > INITIAL_ACCURACY_M },
+  };
+}
+
+export function initialFixStep(state, event) {
+  if (state.done) return state;
+  const timedOut = state.timedOut || event.atMs - state.startedAtMs >= INITIAL_FIX_TIMEOUT_SEC * 1000;
+  if (event.type === "fix") {
+    const fix = event.fix;
+    if (accuracyOf(fix) <= INITIAL_ACCURACY_M) return finishFix(state, fix);
+    const best = state.best === null || accuracyOf(fix) < accuracyOf(state.best) ? fix : state.best;
+    return timedOut ? finishFix(state, best) : { ...state, best, timedOut };
+  }
+  if (event.type === "tick" && timedOut) {
+    return state.best === null ? { ...state, timedOut } : finishFix(state, state.best);
+  }
+  return state;
+}
+
+// ---------- デバッグ用（12章） ----------
+
+// pos から方位 bearing（度）へ m メートル進んだ地点
+export function offsetPosition(pos, bearing, m) {
+  const δ = m / EARTH_RADIUS_M;
+  const θ = rad(bearing);
+  const φ1 = rad(pos.lat);
+  const λ1 = rad(pos.lng);
+  const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
+  const λ2 =
+    λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
+  return { lat: (φ2 * 180) / Math.PI, lng: ((((λ2 * 180) / Math.PI + 540) % 360) - 180) };
+}
+
+export const DEBUG_MAX_BULK_VISITS = 200;
+
+// 記録をまとめて追加するときの中身。店は店リストの順に回し、日付は前日（朝5時区切り）から1日ずつさかのぼる。
+// 今日の除外には影響せず、件数の分だけトロフィーの回数が増える
+export function makeDebugVisits({ count, shops, value, now }) {
+  if (!Number.isInteger(count) || count < 0 || count > DEBUG_MAX_BULK_VISITS) {
+    throw new RangeError(`件数は0〜${DEBUG_MAX_BULK_VISITS}の整数にしてください`);
+  }
+  if (!Object.hasOwn(SCORE, value)) throw new TypeError(`知らない評価です：${value}`);
+  if (count > 0 && (!Array.isArray(shops) || shops.length === 0)) throw new TypeError("店がありません");
+  const nowMs = toMs(now);
+  const visits = [];
+  for (let i = 1; i <= count; i++) {
+    visits.push({
+      shopId: shops[(i - 1) % shops.length].id,
+      value,
+      at: new Date(nowMs - i * DAY_MS).toISOString(),
+    });
+  }
+  return visits;
+}
+
+// 日本時間の「YYYY-MM-DDTHH:MM」（datetime-local の値）を Date にする。端末のタイムゾーンに頼らない
+export function parseJstLocal(text) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(text ?? "");
+  if (!m) return null;
+  const [y, mo, d, h, mi, s = "0"] = m.slice(1);
+  const ms = Date.UTC(+y, +mo - 1, +d, +h, +mi, +s) - JST_OFFSET_MS;
+  const back = new Date(ms + JST_OFFSET_MS);
+  if (back.getUTCFullYear() !== +y || back.getUTCMonth() !== +mo - 1 || back.getUTCDate() !== +d) return null;
+  if (+h > 23 || +mi > 59 || +s > 59) return null;
+  return new Date(ms);
+}
+
+// Date を日本時間の「YYYY-MM-DDTHH:MM」にする（datetime-local の初期値・表示用）
+export function formatJstLocal(time) {
+  return new Date(toMs(time) + JST_OFFSET_MS).toISOString().slice(0, 16);
 }

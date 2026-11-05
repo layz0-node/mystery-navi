@@ -25,6 +25,15 @@ export class MemoryStorage {
     this.map.delete(key);
   }
 
+  // localStorage と同じく、length と key(i) でキーを順に取れる
+  get length() {
+    return this.map.size;
+  }
+
+  key(i) {
+    return [...this.map.keys()][i] ?? null;
+  }
+
   keys() {
     return [...this.map.keys()];
   }

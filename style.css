@@ -77,3 +77,154 @@ body {
   color: var(--text-muted);
   font-size: 14px;
 }
+
+/* デバッグパネル（?debug=1 のときだけ。requirements.md 12章） */
+body:has(.debug-panel) .placeholder {
+  min-height: auto;
+  padding: 24px 16px 8px;
+}
+
+.debug-panel {
+  margin: 0 16px 32px;
+  padding: 12px;
+  border: 1px dashed var(--text-dim);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.debug-panel h1 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.debug-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.debug-section h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.debug-section h3 {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.debug-list {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.debug-row {
+  display: grid;
+  grid-template-columns: 9.5em 1fr;
+  gap: 8px;
+}
+
+.debug-row dt {
+  color: var(--text-muted);
+}
+
+.debug-row dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.debug-field {
+  display: grid;
+  grid-template-columns: 9.5em 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.debug-field span {
+  color: var(--text-muted);
+}
+
+.debug-field input,
+.debug-field select {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* iPhone で入力時に拡大されないように */
+}
+
+.debug-field input[type="range"] {
+  padding: 0;
+}
+
+.debug-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.debug-button {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+}
+
+.debug-danger {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.debug-message {
+  margin: 0;
+  min-height: 1.4em;
+  color: var(--revisit);
+}
+
+.debug-note {
+  margin: 4px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.debug-entry {
+  margin-bottom: 10px;
+}
+
+.debug-entry-title {
+  margin: 0 0 4px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.debug-raw {
+  margin: 0;
+  max-height: 160px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-user-select: text;
+}

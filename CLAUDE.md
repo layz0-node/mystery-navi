@@ -30,9 +30,11 @@ src/logic.js      距離・方位・営業時間・点数・選出・案内先�
 src/storage.js    localStorage の読み書き・取り消し・お知らせの判定・バックアップの書き出しと読み込み
 src/sensors.js    位置情報・方位センサー・デバッグ上書き
 src/app.js        画面の切り替えと描画
+src/debug.js      デバッグパネル（?debug=1 のときだけ app.js から読み込む）
 shops.json        公開用の店データ（アプリが読むのはこれだけ。Phase 8 以降は mystery-navi-data で作る）
 scripts/validate-shops.mjs  店データの検査（パスを引数で渡せる。mystery-navi-data からも使う）
 scripts/screenshot.mjs      Playwright でローカルの画面を開いてスクリーンショットを撮る（開発用）
+scripts/screenshot-steps/   スクリーンショットの手順ファイル（入力・クリック・選択・待つ・撮影・localStorage に値を置く、だけ）
 tests/            node --test のテスト
 tests/fixtures/   テスト用のダミー店。テストは shops.json を読まない
 screenshots/      Playwright で撮った画像（.gitignore 済み。コミットしない）
@@ -80,6 +82,7 @@ npm run screenshot              # WebKit・iPhone相当の画面で ?debug=1 を
 - `--browser=chromium`：Chromium で撮る。**基本は WebKit。Chromium は必要なときだけ**
 - `--full`：ページ全体
 - `--reduced-motion`：動きを減らす設定で撮る
+- `--steps=scripts/screenshot-steps/phase3.json`：手順ファイルの操作を順に実行し、手順の中の `shot` ごとに撮る
 
 スクリプトが自分でローカルのサーバーを立てるので、`python3 -m http.server` を別に動かしておく必要はない。初回は `npx playwright install webkit chromium` でブラウザを入れる。
 
