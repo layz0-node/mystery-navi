@@ -180,6 +180,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
       row("最初の位置", "dbg-initial-fix"),
       row("記録", "dbg-visits"),
       row("保存", "dbg-saving"),
+      row("動きを減らす設定", "dbg-reduced-motion"),
     ]),
     el("div", { class: "debug-buttons" }, [
       button("センサーを開始", "dbg-start-sensors", async () => {
@@ -477,6 +478,20 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     renderEntries();
     onChange(current);
   }
+
+  // 動きを減らす設定（prefers-reduced-motion）。オンのときは赤黒の矢印が脈打たず、行き先が変わっても回らない
+  const reducedMotion = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
+  const renderReducedMotion = () =>
+    setText(
+      "dbg-reduced-motion",
+      reducedMotion === null
+        ? "判定できません"
+        : reducedMotion.matches
+          ? "オン（赤黒の矢印は脈打たず、行き先が変わっても回らない）"
+          : "オフ",
+    );
+  reducedMotion?.addEventListener?.("change", renderReducedMotion);
+  renderReducedMotion();
 
   sensors.subscribe(render);
   setInterval(() => setText("dbg-time", `${fmtJst(sensors.now())}${sensors.getState().timeOverridden ? "（上書き中）" : ""}`), 1000);
