@@ -14,3 +14,6 @@ node_modules/
 
 # macOS
 .DS_Store
+
+# Claude Code の個人設定（この Mac 用）
+.claude/settings.local.json

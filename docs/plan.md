@@ -85,8 +85,10 @@ ls -a mystery-navi mystery-navi-data
 ```
 
 - `unzip` すると、2つのリポジトリに一度にファイルが入る
-- `ls -a` で `.gitignore` と `.claude` が見えれば成功
-- **Finderでコピーしない。** `.gitignore` と `.claude` は隠しファイルで、Finderでは見えずにコピーし忘れやすい。漏れると、公開側の安全装置と店リスト作成スキルがなくなる
+- `ls -a` で、`mystery-navi` に `.gitignore`、`mystery-navi-data` に `.gitignore` と `.claude` が見えれば成功
+- **Finderでコピーしない。** `.gitignore` と `.claude` は隠しファイルで、Finderでは見えずにコピーし忘れやすい。漏れると、次の2つがなくなる
+  - 公開側（`mystery-navi`）の `.gitignore`：作業用データ（`data/`・`*.master.json`・`review.md`）やスクリーンショットを誤って公開しないための安全装置
+  - 非公開側（`mystery-navi-data`）の `.claude`：店リスト作成スキル
 
 ### 5. その他
 

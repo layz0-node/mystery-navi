@@ -32,6 +32,7 @@ src/sensors.js    位置情報・方位センサー・デバッグ上書き
 src/app.js        画面の切り替えと描画
 shops.json        公開用の店データ（アプリが読むのはこれだけ。Phase 8 以降は mystery-navi-data で作る）
 scripts/validate-shops.mjs  店データの検査（パスを引数で渡せる。mystery-navi-data からも使う）
+scripts/screenshot.mjs      Playwright でローカルの画面を開いてスクリーンショットを撮る（開発用）
 tests/            node --test のテスト
 tests/fixtures/   テスト用のダミー店。テストは shops.json を読まない
 screenshots/      Playwright で撮った画像（.gitignore 済み。コミットしない）
@@ -69,9 +70,17 @@ screenshots/      Playwright で撮った画像（.gitignore 済み。コミッ�
 python3 -m http.server 8000     # ローカルで開く → http://localhost:8000/?debug=1
 node --test                     # テスト
 node scripts/validate-shops.mjs # 店データの検査（パスを渡すと別のファイルも検査できる）
+npm run screenshot              # WebKit・iPhone相当の画面で ?debug=1 を撮る → screenshots/page-webkit.png
 ```
 
-スクリーンショットを撮るコマンドは Phase 0 で用意し、ここに書き足す。
+スクリーンショットのオプション（`npm run screenshot -- ` の後に付ける）
+- `--name=s1`：保存名（`screenshots/s1-webkit.png`）
+- `--url="?debug=1&..."`：開くURL（ルートからの相対）
+- `--browser=chromium`：Chromium で撮る。**基本は WebKit。Chromium は必要なときだけ**
+- `--full`：ページ全体
+- `--reduced-motion`：動きを減らす設定で撮る
+
+スクリプトが自分でローカルのサーバーを立てるので、`python3 -m http.server` を別に動かしておく必要はない。初回は `npx playwright install webkit chromium` でブラウザを入れる。
 
 ※ localhost では位置情報が使えるが、スマホ実機で試すにはHTTPSの公開URLが必要。
 

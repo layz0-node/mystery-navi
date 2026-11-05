@@ -1,0 +1,79 @@
+/* 色とフォント（requirements.md 8章） */
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: rgba(255, 255, 255, 0.07);
+  --text: #e8e8f0;
+  --text-muted: #6b6b80;
+  --text-dim: #3a3a50;
+  --accent: #c8b89a; /* 通常の矢印 */
+  --revisit: #7eb8a4; /* 点数プラスの矢印 */
+  --cursed: #8e1626; /* 点数マイナスの矢印：赤 */
+  --cursed-deep: #1a0407; /* 点数マイナスの矢印：黒 */
+  --good: #7eb8a4;
+  --bad: #b87e7e;
+  --skip: #8a8a9a;
+  --closed: #b8a07e;
+
+  /* トロフィー（初期値。実装時に見やすさで調整してよい） */
+  --trophy-none: #3a3a50;
+  --trophy-iron: #8a8f98;
+  --trophy-bronze: #b0835a;
+  --trophy-silver: #c3c8d1;
+  --trophy-gold: #d8b45a;
+  --trophy-emerald: #3f9d74;
+  --trophy-diamond: #b9e3f2;
+  --trophy-polaris: #f4f1ff;
+
+  --font-body: "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* Phase 0 の仮の表示（Phase 4 で置き換える） */
+.placeholder {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.placeholder-mark {
+  margin: 0;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 20px;
+}
+
+.placeholder-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
