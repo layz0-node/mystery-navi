@@ -1,0 +1,16 @@
+# 店リストの作業用データは非公開リポジトリ mystery-navi-data に置く。
+# 誤ってこちらに置いても公開されないよう、念のため除外する。
+data/
+*.master.json
+review.md
+
+# Playwright のスクリーンショット・結果（デバッグで入れた位置が写ることがあるので公開しない）
+screenshots/
+test-results/
+playwright-report/
+
+# 開発用の依存
+node_modules/
+
+# macOS
+.DS_Store
