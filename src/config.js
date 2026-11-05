@@ -14,6 +14,7 @@ export const UNVISITED_PICK_RATE = 0.7; // 両方に候補があるとき、未�
 export const BAD_PICK_WEIGHT = 0.5; // 訪問済みグループの中で、点数がマイナスの店の選ばれやすさ（他の店は1）
 export const CLOSED_EXCLUDE_DAYS = 7; // 「閉まっていた」の後、選ばない日数（記録の日時から 日数×24時間）
 export const TARGET_TTL_HOURS = 3; // 未到着の案内先を保持する時間
+export const ARRIVAL_MIN_HOLD_HOURS = 3; // 到着画面を保つ最短の時間（到着した日の翌朝5時と、到着からこの時間後の遅いほうまで保つ）
 export const DAY_BOUNDARY_HOUR = 5; // 「同じ日」を切り替える時刻（日本時間）
 export const UNDO_SEC = 5; // 評価を取り消せる秒数
 export const NOTICE_SEC = 4; // 昇格・行き先の変更などのお知らせを表示する秒数
