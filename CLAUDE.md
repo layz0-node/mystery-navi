@@ -22,7 +22,7 @@
 index.html
 style.css
 manifest.webmanifest  ホーム画面対応
-sw.js             サービスワーカー（変更したらバージョンを上げる）
+sw.js             サービスワーカー（変更したらバージョンを上げる。src/ やアイコンにファイルを足したら APP_FILES にも足す）
 icons/            ホーム画面用アイコン（指南魚のモチーフ）
 package.json      "type": "module"。devDependencies は Playwright だけ
 src/config.js     定数（requirements.md 9章）
@@ -33,6 +33,7 @@ src/app.js        画面の切り替えと描画
 src/debug.js      デバッグパネル（?debug=1 のときだけ app.js から読み込む）
 shops.json        公開用の店データ（アプリが読むのはこれだけ。Phase 8 以降は mystery-navi-data で作る）
 scripts/validate-shops.mjs  店データの検査（パスを引数で渡せる。mystery-navi-data からも使う）
+scripts/make-icons.mjs      ホーム画面用アイコン（icons/）を図形の定義から書き出す（開発用。依存なし）
 scripts/screenshot.mjs      Playwright でローカルの画面を開いてスクリーンショットを撮る（開発用）
 scripts/screenshot-steps/   スクリーンショットの手順ファイル（入力・クリック・選択・待つ・撮影・localStorage に値を置く、だけ）
 tests/            node --test のテスト
@@ -76,6 +77,7 @@ screenshots/      Playwright で撮った画像（.gitignore 済み。コミッ�
 python3 -m http.server 8000     # ローカルで開く → http://localhost:8000/?debug=1
 node --test                     # テスト
 node scripts/validate-shops.mjs # 店データの検査（パスを渡すと別のファイルも検査できる）
+node scripts/make-icons.mjs     # アイコンを icons/ に書き出す（--preview で見本を screenshots/icon-preview.png に）
 npm run screenshot              # WebKit・iPhone相当の画面で ?debug=1 を撮る → screenshots/page-webkit.png
 ```
 

@@ -59,15 +59,44 @@ const RECOVERED_TEXT = "保存データが読めなかったため、新しく�
 
 const $ = (id) => document.getElementById(id);
 
+// → { shops, dataVersion, ms, ok }（dataVersion・ms・ok はデバッグパネルの表示用）
 async function loadShops(url) {
+  const started = performance.now();
+  const done = (shops, dataVersion, ok) => ({ shops, dataVersion, ms: Math.round(performance.now() - started), ok });
   try {
     const res = await fetch(url, { cache: "no-cache" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return Array.isArray(data.shops) ? data.shops : [];
+    return done(Array.isArray(data.shops) ? data.shops : [], typeof data.dataVersion === "string" ? data.dataVersion : null, true);
   } catch (e) {
     console.error("店データを読み込めませんでした", e);
-    return [];
+    return done([], null, false);
+  }
+}
+
+// ---------- ホーム画面対応（11章） ----------
+
+// サービスワーカーを登録する。使えない端末・HTTPS でないときは何もしない
+// → Promise<ServiceWorkerRegistration | null>
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return Promise.resolve(null);
+  const register = () =>
+    navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" }).catch((e) => {
+      console.warn("サービスワーカーを登録できませんでした", e);
+      return null;
+    });
+  if (document.readyState === "complete") return register();
+  return new Promise((resolve) => window.addEventListener("load", () => resolve(register()), { once: true }));
+}
+
+// 保存データを消されにくくする（対応していない端末では何もしない）→ Promise<true | false | null>
+async function requestPersistentStorage() {
+  try {
+    if (!navigator.storage?.persist) return null;
+    if (await navigator.storage.persisted()) return true;
+    return await navigator.storage.persist();
+  } catch {
+    return null;
   }
 }
 
@@ -207,6 +236,8 @@ function createNotices(node) {
 
 async function main() {
   const mode = appMode(location.search);
+  const swRegistration = registerServiceWorker();
+  const persisted = requestPersistentStorage();
   const realStorage = getLocalStorage();
   // ダミー店モードでは、本物の記録と混ざらないよう保存先を分ける（12章）
   const storage = mode.testShops ? testShopsStorage(realStorage) : realStorage;
@@ -231,7 +262,8 @@ async function main() {
       : null,
   });
   const store = createStore({ storage, now: sensors.now() });
-  const shops = await loadShops(mode.testShops ? TEST_SHOPS_URL : SHOPS_URL);
+  const shopData = await loadShops(mode.testShops ? TEST_SHOPS_URL : SHOPS_URL);
+  const { shops } = shopData;
   const wakeLock = createWakeLock();
   const notices = createNotices($("notice"));
 
@@ -965,7 +997,10 @@ async function main() {
   sensors.subscribe(onSensors);
   setInterval(checkArrivalHold, HOLD_CHECK_MS);
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") checkArrivalHold();
+    if (document.visibilityState !== "visible") return;
+    checkArrivalHold();
+    // 表に戻ったら、新しい版が出ていないか確かめる（入れ替わるのは次に開いたとき）
+    swRegistration.then((r) => r?.update()).catch(() => {});
   });
 
   if (mode.debug) {
@@ -978,6 +1013,7 @@ async function main() {
       storage,
       settings: debugSettings,
       testShops: mode.testShops,
+      pwa: { swRegistration, persisted, shopData, standalone: isStandalone() },
       onChange(settings) {
         const hadTemp = Boolean(debugSettings?.tempTarget);
         debugSettings = settings;

@@ -146,10 +146,45 @@ async function copyText(text, fallbackNode) {
   }
 }
 
+// ---------- ホーム画面対応（11章） ----------
+
+// sw.js の CACHE_PREFIX と同じ（tests/pwa-files.test.js で確かめる）
+export const APP_CACHE_PREFIX = "mystery-navi-";
+
+// アプリのキャッシュを消す：このページの範囲（scopeUrl）のサービスワーカーの登録を解除し、
+// APP_CACHE_PREFIX で始まるキャッシュだけを消す。評価の記録（localStorage）には絶対に触らない。
+// 引数で渡したもの以外は使わない → { registrations: 解除した数, caches: [消したキャッシュの名前] }
+export async function clearAppCaches({ serviceWorker, caches, scopeUrl }) {
+  const removed = { registrations: 0, caches: [] };
+  if (serviceWorker?.getRegistrations) {
+    for (const r of await serviceWorker.getRegistrations()) {
+      if (r.scope !== scopeUrl) continue;
+      if (await r.unregister()) removed.registrations++;
+    }
+  }
+  if (caches?.keys) {
+    for (const key of await caches.keys()) {
+      if (!key.startsWith(APP_CACHE_PREFIX)) continue;
+      if (await caches.delete(key)) removed.caches.push(key);
+    }
+  }
+  return removed;
+}
+
+function loadImageSize(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(`${img.naturalWidth}px`);
+    img.onerror = () => resolve("読み込めません");
+    img.src = src;
+  });
+}
+
 // ---------- パネル ----------
 
 // testShops：ダミー店モード（?debug=1&shops=test）。onChange(settings)：設定や記録を変えたら呼ぶ（画面を描き直す）
-export function mountDebugPanel({ root, store, sensors, shops, storage, settings, testShops = false, onChange = () => {} }) {
+// pwa：{ swRegistration: Promise<登録 | null>, persisted: Promise<true | false | null>, shopData: { shops, dataVersion, ms, ok }, standalone }
+export function mountDebugPanel({ root, store, sensors, shops, storage, settings, testShops = false, pwa = null, onChange = () => {} }) {
   let current = { ...settings };
   let lastFix = null;
   const message = el("p", { id: "debug-message", class: "debug-message", role: "status" });
@@ -209,6 +244,90 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
       }),
     ]),
   ]);
+
+  // ホーム画面対応：サービスワーカー・キャッシュ・店リスト・マニフェスト・永続化（11章）
+  const pwaSection = section("ホーム画面対応", [
+    el("dl", { class: "debug-list" }, [
+      row("サービスワーカー", "dbg-sw"),
+      row("キャッシュ（＝動いている版）", "dbg-caches"),
+      row("店リスト", "dbg-shops"),
+      row("マニフェスト", "dbg-manifest"),
+      row("保存の永続化", "dbg-persist"),
+      row("ホーム画面から開いている", "dbg-standalone"),
+    ]),
+    el("p", {
+      class: "debug-note",
+      text: "「アプリのキャッシュを消して読み込み直す」は、サービスワーカーの登録とアプリのキャッシュだけを消します。評価の記録・案内先・デバッグの設定（端末の保存データ）は消しません",
+    }),
+    el("div", { class: "debug-buttons" }, [
+      button("表示を更新", "dbg-refresh-pwa", () => renderPwa()),
+      button(
+        "アプリのキャッシュを消して読み込み直す",
+        "dbg-clear-cache",
+        async () => {
+          if (!confirm("アプリのキャッシュを消して、読み込み直します。評価の記録は消えません。よろしいですか？")) return;
+          try {
+            const r = await clearAppCaches({
+              serviceWorker: navigator.serviceWorker,
+              caches: globalThis.caches,
+              scopeUrl: new URL("./", location.href).href,
+            });
+            say(`消しました（登録の解除 ${r.registrations}件・キャッシュ ${r.caches.length}件）。読み込み直します`);
+            location.reload();
+          } catch (e) {
+            say(`消せませんでした（${e?.message ?? e}）`);
+          }
+        },
+        "debug-danger",
+      ),
+    ]),
+  ]);
+
+  async function renderPwa() {
+    const sw = navigator.serviceWorker;
+    if (!sw) {
+      setText("dbg-sw", "使えません（HTTPS でない、または対応していない）");
+    } else {
+      const reg = await (pwa?.swRegistration ?? Promise.resolve(null)).catch(() => null);
+      let text = "登録できませんでした";
+      if (sw.controller) text = "このページを制御しています";
+      else if (reg?.installing) text = "インストール中";
+      else if (reg?.waiting || reg?.active) text = "登録済み（次に開くと有効）";
+      setText("dbg-sw", text);
+    }
+
+    try {
+      const keys = (await globalThis.caches.keys()).filter((k) => k.startsWith(APP_CACHE_PREFIX));
+      setText("dbg-caches", keys.length > 0 ? keys.join("・") : "なし");
+    } catch {
+      setText("dbg-caches", "使えません");
+    }
+
+    const d = pwa?.shopData;
+    setText("dbg-shops", !d ? "—" : d.ok ? `${d.shops.length}軒・${d.dataVersion ?? "版の表示なし"}・読み込み ${d.ms}ms` : `読み込めませんでした（${d.ms}ms）`);
+
+    try {
+      const link = document.querySelector('link[rel="manifest"]');
+      const m = await (await fetch(link.href)).json();
+      const srcs = [...new Set((m.icons ?? []).map((i) => new URL(i.src, link.href).href))];
+      const touch = document.querySelector('link[rel="apple-touch-icon"]');
+      if (touch) srcs.push(touch.href);
+      const sizes = await Promise.all(srcs.map(loadImageSize));
+      setText("dbg-manifest", `${m.name}（${m.display}・${m.orientation}）・アイコン ${sizes.join("・")}`);
+    } catch (e) {
+      setText("dbg-manifest", `読み込めません（${e?.message ?? e}）`);
+    }
+
+    const asked = await (pwa?.persisted ?? Promise.resolve(null)).catch(() => null);
+    let now = null;
+    try {
+      now = navigator.storage?.persisted ? await navigator.storage.persisted() : null;
+    } catch {
+      now = null;
+    }
+    setText("dbg-persist", now === null && asked === null ? "対応していません" : now || asked ? "許可されています" : "許可されていません");
+    setText("dbg-standalone", pwa?.standalone ? "はい" : "いいえ（ブラウザ）");
+  }
 
   // 現在地
   const pos = current.position;
@@ -430,6 +549,7 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     modeNote,
     message,
     status,
+    pwaSection,
     position,
     failure,
     heading,
@@ -527,6 +647,9 @@ export function mountDebugPanel({ root, store, sensors, shops, storage, settings
     );
   reducedMotion?.addEventListener?.("change", renderReducedMotion);
   renderReducedMotion();
+
+  navigator.serviceWorker?.addEventListener?.("controllerchange", () => renderPwa());
+  renderPwa();
 
   sensors.subscribe(render);
   // 評価や取り消しで記録・案内先が変わっても追いつくように、いまの値を1秒ごとに描き直す

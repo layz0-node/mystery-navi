@@ -5,9 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0a0a0f">
   <title>　</title>
+  <!-- ホーム画面対応（11章）。名前は「指煙魚」。<title> は空白のまま（タブに名前を出さない） -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="指煙魚">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Noto+Sans+JP:wght@300;400;500&display=swap">
+  <!-- フォントは表示とJSの実行を止めないように読み込む（media="print" で読み、届いたら切り替える）。届くまでは端末のフォント -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Noto+Sans+JP:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="./style.css">
   <script type="module" src="./src/app.js"></script>
 </head>
