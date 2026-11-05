@@ -54,6 +54,7 @@ screenshots/      Playwright で撮った画像（.gitignore 済み。コミッ�
 12. **ロジックは `src/logic.js` に純粋な関数として置き、テストを書く。** 乱数と現在時刻は引数で渡し、テストで固定できるようにする
 13. UIの文言は日本語のみ（方位の N・E・S・W だけ例外）
 14. 1回の作業は `docs/plan.md` の1フェーズまで。終わったら止まって報告する
+15. **`scripts/screenshot.mjs` と `package.json` の `scripts` は、サンドボックスの外で動く。変えるときは、実装の前に計画で伝える**（スクリーンショットは必ず `npm run screenshot` から撮る。`node scripts/screenshot.mjs` を直接実行しない）
 
 ## 作業が終わったと言う前に
 
