@@ -23,7 +23,7 @@ index.html
 style.css
 manifest.webmanifest  ホーム画面対応
 sw.js             サービスワーカー（変更したらバージョンを上げる）
-icons/            ホーム画面用アイコン（コンパスのモチーフ）
+icons/            ホーム画面用アイコン（指南魚のモチーフ）
 package.json      "type": "module"。devDependencies は Playwright だけ
 src/config.js     定数（requirements.md 9章）
 src/logic.js      距離・方位・営業時間・点数・選出・案内先の再開判定・トロフィーの集計（DOMに触らない純粋な関数だけ）
