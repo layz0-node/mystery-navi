@@ -10,13 +10,20 @@
 //   npm run screenshot -- --reduced-motion               # 動きを減らす設定で撮る
 //   npm run screenshot -- --steps=scripts/screenshot-steps/phase3.json  # 手順を順に実行して撮る
 //
-// 手順ファイル（JSON の配列）で使える操作は次の6つだけ。1つの手順に1つの操作を書く。
+// 手順ファイル（JSON の配列）で使える操作は次の10個だけ。1つの手順に1つの操作を書く。
 //   { "fill": "<セレクタ>", "value": "<文字列>" }        入力
 //   { "click": "<セレクタ>" }                             クリック（確認ダイアログは「OK」で閉じる）
 //   { "select": "<セレクタ>", "value": "<文字列>" }      選択
 //   { "wait": <ミリ秒（10000まで）> }                    待つ
 //   { "shot": "<保存名>", "full": true }                  撮影 → screenshots/<保存名>-<ブラウザ>.png
 //   { "localStorage": { "<キー>": "<文字列>" } }          localStorage に値を置いて、ページを開き直す
+//   { "offline": true }                                   ネットワークを切る（false で戻す）
+//   { "reload": true }                                    再読み込み（load まで待つ。遅らせた応答は待たない）
+//   { "serverDelay": "<ファイル>", "ms": <30000まで> }    そのファイルの応答を遅らせる（0 で元に戻す）
+//   { "serverReplace": "<ファイル>", "from": "<文字列>", "to": "<文字列>" }
+//                                                         配信する中身の from をすべて to に置き換える（ディスクのファイルは変えない）
+// <ファイル> はリポジトリのルートからの相対パス。リポジトリの外は指定できない。
+// serverReplace は文字のファイル（.html・.css・.js・.mjs・.json・.webmanifest・.svg）だけで、from が中身にないときは止まる。
 // 手順ファイルでは Node 側の任意のコードは実行できない。
 //
 // このリポジトリのフォルダを Node 標準の http サーバーで配信してから開く（別にサーバーを立てなくてよい）。
@@ -64,8 +71,21 @@ function parseArgs(argv) {
 
 const NAME_PATTERN = /^[\w.-]+$/;
 const MAX_WAIT_MS = 10000;
+const MAX_DELAY_MS = 30000;
+const TEXT_EXTS = [".html", ".css", ".js", ".mjs", ".json", ".webmanifest", ".svg"];
 
-// 手順ファイルを読み、決まった6つの操作だけからなるかを検査する
+// 配信の書き換え（手順の serverDelay・serverReplace で設定する）。キーはリポジトリの中の絶対パス
+const serverDelays = new Map(); // ファイル → ミリ秒
+const serverReplaces = new Map(); // ファイル → [{ from, to }]
+
+// 手順で指定したファイルを、リポジトリの中の絶対パスにする（外に出るパスは止める）
+function repoFile(rel) {
+  const file = path.resolve(ROOT, rel);
+  if (!file.startsWith(ROOT + path.sep)) throw new Error(`リポジトリの外のファイルです: ${rel}`);
+  return file;
+}
+
+// 手順ファイルを読み、決まった10個の操作だけからなるかを検査する
 async function loadSteps(file) {
   const steps = JSON.parse(await readFile(path.resolve(ROOT, file), "utf8"));
   if (!Array.isArray(steps)) throw new Error("手順ファイルは配列にしてください");
@@ -90,8 +110,22 @@ async function loadSteps(file) {
       if (!has(["localStorage"]) || values === null || typeof values !== "object" || Array.isArray(values) || !Object.values(values).every((v) => typeof v === "string")) {
         throw new Error(`${where}：localStorage は { キー: 文字列 } にしてください`);
       }
+    } else if ("offline" in step) {
+      if (!has(["offline"]) || typeof step.offline !== "boolean") throw new Error(`${where}：offline は true か false です`);
+    } else if ("reload" in step) {
+      if (!has(["reload"]) || step.reload !== true) throw new Error(`${where}：reload は true だけです`);
+    } else if ("serverDelay" in step) {
+      if (!has(["serverDelay", "ms"]) || !isStr(step.serverDelay) || !Number.isInteger(step.ms) || step.ms < 0 || step.ms > MAX_DELAY_MS) {
+        throw new Error(`${where}：serverDelay にはファイルと ms（0〜${MAX_DELAY_MS}）が要ります`);
+      }
+      repoFile(step.serverDelay);
+    } else if ("serverReplace" in step) {
+      if (!has(["serverReplace", "from", "to"]) || !isStr(step.serverReplace) || !isStr(step.from) || typeof step.to !== "string") {
+        throw new Error(`${where}：serverReplace にはファイルと from（文字列）・to（文字列）が要ります`);
+      }
+      if (!TEXT_EXTS.includes(path.extname(repoFile(step.serverReplace)))) throw new Error(`${where}：serverReplace は文字のファイルだけです（${TEXT_EXTS.join("・")}）`);
     } else {
-      throw new Error(`${where}：使えない操作です（fill・click・select・wait・shot・localStorage だけ）`);
+      throw new Error(`${where}：使えない操作です（fill・click・select・wait・shot・localStorage・offline・reload・serverDelay・serverReplace だけ）`);
     }
   });
   return steps;
@@ -101,7 +135,20 @@ async function loadSteps(file) {
 async function runSteps(page, steps, opts) {
   const saved = [];
   for (const step of steps) {
-    if ("fill" in step) await page.fill(step.fill, step.value);
+    if ("offline" in step) await page.context().setOffline(step.offline);
+    else if ("reload" in step) {
+      await page.reload({ waitUntil: "load" });
+    } else if ("serverDelay" in step) {
+      const file = repoFile(step.serverDelay);
+      if (step.ms === 0) serverDelays.delete(file);
+      else serverDelays.set(file, step.ms);
+    } else if ("serverReplace" in step) {
+      const file = repoFile(step.serverReplace);
+      const list = serverReplaces.get(file) ?? [];
+      const current = list.reduce((text, r) => text.split(r.from).join(r.to), await readFile(file, "utf8"));
+      if (!current.includes(step.from)) throw new Error(`serverReplace：${step.serverReplace} に「${step.from}」がありません`);
+      serverReplaces.set(file, [...list, { from: step.from, to: step.to }]);
+    } else if ("fill" in step) await page.fill(step.fill, step.value);
     else if ("select" in step) await page.selectOption(step.select, step.value);
     else if ("click" in step) await page.click(step.click);
     else if ("wait" in step) await page.waitForTimeout(step.wait);
@@ -129,7 +176,11 @@ function startServer() {
       let file = path.join(ROOT, decodeURIComponent(pathname));
       if (!file.startsWith(ROOT + path.sep) && file !== ROOT) throw new Error("outside");
       if ((await stat(file)).isDirectory()) file = path.join(file, "index.html");
-      const body = await readFile(file);
+      const delay = serverDelays.get(file);
+      if (delay) await new Promise((r) => setTimeout(r, delay));
+      let body = await readFile(file);
+      const replaces = serverReplaces.get(file);
+      if (replaces) body = Buffer.from(replaces.reduce((text, r) => text.split(r.from).join(r.to), body.toString("utf8")), "utf8");
       res.writeHead(200, { "content-type": MIME[path.extname(file)] ?? "application/octet-stream", "cache-control": "no-store" });
       res.end(body);
     } catch {
