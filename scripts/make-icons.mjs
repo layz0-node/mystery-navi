@@ -5,10 +5,11 @@
 // 図形をこのファイルの中で座標として定義し、同じ定義から SVG と PNG を書き出す。
 // 依存はなし（PNG は Node 標準の zlib で書き出す）。ブラウザもサンドボックスの外も使わない。
 //
+// 形：方位盤の2本の輪と、東西・斜めの目盛りの中に、方位盤の針に見える大きな指南魚（2026-11-06 決定）。
+// 南北の目盛りは置かない（魚の頭と尾がそこに来るため）。
+//
 // 使い方:
-//   node scripts/make-icons.mjs              # 案A で icons/ に書き出す
-//   node scripts/make-icons.mjs --design=b   # 案B で書き出す
-//   node scripts/make-icons.mjs --preview    # 3案の見本を screenshots/icon-preview.png に書き出す（コミットしない）
+//   node scripts/make-icons.mjs   # icons/ に書き出す
 //
 // 書き出すもの（icons/）
 //   icon.svg              ブラウザのタブ用
@@ -26,7 +27,6 @@ import zlib from "node:zlib";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ICONS_DIR = path.join(ROOT, "icons");
-const PREVIEW_FILE = path.join(ROOT, "screenshots", "icon-preview.png");
 
 const BASE = 512; // 図形の座標はこの大きさで書く
 const CENTER = BASE / 2;
@@ -37,7 +37,6 @@ const COLORS = {
   bgCenter: "#15151e",
   fish: "#c8b89a", // 通常の矢印と同じゴールドベージュ
   fishShade: "#9a8a6e", // 針の左半分（羅針盤の針のように2色に分ける）
-  water: "#10151f",
 };
 
 // ---------- 図形（パス）----------
@@ -64,22 +63,6 @@ function ring(cx, cy, r, width) {
 
 function rect(x, y, w, h) {
   return [["M", x, y], ["L", x + w, y], ["L", x + w, y + h], ["L", x, y + h], ["Z"]];
-}
-
-function roundedRect(x, y, w, h, r) {
-  const k = KAPPA * r;
-  return [
-    ["M", x + r, y],
-    ["L", x + w - r, y],
-    ["C", x + w - r + k, y, x + w, y + r - k, x + w, y + r],
-    ["L", x + w, y + h - r],
-    ["C", x + w, y + h - r + k, x + w - r + k, y + h, x + w - r, y + h],
-    ["L", x + r, y + h],
-    ["C", x + r - k, y + h, x, y + h - r + k, x, y + h - r],
-    ["L", x, y + r],
-    ["C", x, y + r - k, x + r - k, y, x + r, y],
-    ["Z"],
-  ];
 }
 
 // 中心から angle 度（0 が上、時計回り）の向きに、半径 r0〜r1 の細長い四角（目盛り）
@@ -147,39 +130,20 @@ const glow = (r) => ({
   gradient: { cx: CENTER, cy: CENTER, r, stops: [[0, COLORS.fish, 0.16], [1, COLORS.fish, 0]] },
 });
 
-// ---------- 3案 ----------
+// ---------- アイコンの形 ----------
 
-const DESIGNS = {
-  // 案A：魚だけ。小さく表示しても形がわかる
-  a: () => [background(), glow(190), ...fishShapes({ scale: 1.13 })],
-
-  // 案B：方位盤の輪と目盛りの中に魚。起動画面のコンパスのマークとそろう
-  b: () => [
+function iconShapes() {
+  return [
     background(),
     { path: ring(CENTER, CENTER, 192, 5), fill: COLORS.fish, opacity: 0.5, rule: "evenodd" },
     { path: ring(CENTER, CENTER, 174, 2), fill: COLORS.fish, opacity: 0.22, rule: "evenodd" },
-    ...[0, 90, 180, 270].map((a) => ({ path: tick(a, 150, 170, 5), fill: COLORS.fish, opacity: a === 0 ? 0.95 : 0.5 })),
+    // 目盛りは東西と斜めだけ（南北には魚の頭と尾が来る）
+    ...[90, 270].map((a) => ({ path: tick(a, 150, 170, 5), fill: COLORS.fish, opacity: 0.5 })),
     ...[45, 135, 225, 315].map((a) => ({ path: tick(a, 158, 170, 3), fill: COLORS.fish, opacity: 0.35 })),
-    glow(140),
-    ...fishShapes({ scale: 0.86 }),
-  ],
-
-  // 案C：水を張った器に浮かぶ魚と波紋。指南魚の本来の使い方
-  c: () => [
-    background(),
-    {
-      path: circle(CENTER, CENTER, 194),
-      gradient: { cx: CENTER, cy: CENTER, r: 194, stops: [[0, "#24324a", 1], [1, COLORS.water, 1]] },
-    },
-    { path: ring(CENTER, CENTER, 194, 7), fill: COLORS.fish, opacity: 0.55, rule: "evenodd" },
-    ...[
-      [170, 0.12],
-      [146, 0.2],
-      [122, 0.3],
-    ].map(([r, o]) => ({ path: ring(CENTER, CENTER, r, 2.5), fill: "#9fb4cf", opacity: o, rule: "evenodd" })),
-    ...fishShapes({ scale: 0.78 }),
-  ],
-};
+    glow(165),
+    ...fishShapes({ scale: 1.12 }),
+  ];
+}
 
 // ---------- 色 ----------
 
@@ -386,87 +350,36 @@ function toSvg(shapes) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${BASE} ${BASE}"><defs>${defs.join("")}</defs>${body.join("")}</svg>\n`;
 }
 
-// 図柄が Android の丸い切り抜きの内側に収まっているか（背景・器の全面の図形は除く）
-function checkSafeZone(name, shapes) {
+// 図柄が Android の丸い切り抜きの内側に収まっているか（背景・光のように切れてもよい図形は除く）
+// → 一番外側の点の、中央からの距離（px）
+function checkSafeZone(shapes) {
+  let max = 0;
   for (const s of shapes) {
-    if (s.gradient) continue; // 背景・器・光は切れてもよい
+    if (s.gradient) continue;
     for (const poly of flatten(s.path, 1)) {
       for (const [x, y] of poly) {
         const r = Math.hypot(x - CENTER, y - CENTER);
-        if (r > SAFE_RADIUS) throw new Error(`案${name.toUpperCase()}：中央から ${r.toFixed(1)}px の点があり、丸い切り抜きで欠けます`);
+        if (r > SAFE_RADIUS) throw new Error(`中央から ${r.toFixed(1)}px の点があり、丸い切り抜きで欠けます（${SAFE_RADIUS}px まで）`);
+        max = Math.max(max, r);
       }
     }
   }
-}
-
-// ---------- 見本 ----------
-
-// 3案を、iPhone（角丸）と Android（丸）の切り抜きで、暗い壁紙と明るい壁紙に並べる。左から A・B・C
-function renderPreview() {
-  const width = 1170;
-  const rows = [
-    { bg: "#1d2230", mask: "ios" },
-    { bg: "#dde2ea", mask: "ios" },
-    { bg: "#1d2230", mask: "android" },
-  ];
-  const rowH = 330;
-  const canvas = createCanvas(width, rowH * rows.length, "#000000");
-  const columns = [195, 585, 975];
-  rows.forEach((row, ri) => {
-    fillShape(canvas, { path: rect(0, ri * rowH, width, rowH), fill: row.bg }, 1);
-    Object.values(DESIGNS).forEach((design, ci) => {
-      const shapes = design();
-      // 大：180px（iPhone の実際の大きさ）。小：60px と 40px
-      const big = 180;
-      const x = columns[ci] - big / 2;
-      const y = ri * rowH + 30;
-      blit(canvas, renderIcon(shapes, big), x, y, row.mask);
-      blit(canvas, renderIcon(shapes, 60), columns[ci] - 70, y + big + 40, row.mask);
-      blit(canvas, renderIcon(shapes, 40), columns[ci] + 20, y + big + 50, row.mask);
-    });
-  });
-  return canvas;
-}
-
-function blit(dst, src, x0, y0, mask) {
-  const size = src.width;
-  const shape = mask === "ios" ? roundedRect(x0, y0, size, size, size * 0.225) : circle(x0 + size / 2, y0 + size / 2, size / 2);
-  const cov = coverage(dst.width, dst.height, shape, 1);
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const di = (y0 + y) * dst.width + (x0 + x);
-      const a = Math.min(1, cov[di]);
-      if (a <= 0) continue;
-      const si = y * size + x;
-      for (let k = 0; k < 3; k++) dst.data[di * 3 + k] = dst.data[di * 3 + k] * (1 - a) + src.data[si * 3 + k] * a;
-    }
-  }
+  return max;
 }
 
 // ---------- 実行 ----------
 
 async function main() {
   const args = process.argv.slice(2);
-  const preview = args.includes("--preview");
-  const designArg = args.find((a) => a.startsWith("--design="))?.slice("--design=".length) ?? "a";
-  for (const a of args) if (a !== "--preview" && !a.startsWith("--design=")) throw new Error(`不明な引数です: ${a}`);
-  if (!DESIGNS[designArg]) throw new Error(`--design は ${Object.keys(DESIGNS).join("・")} のどれかです`);
-  for (const [name, design] of Object.entries(DESIGNS)) checkSafeZone(name, design());
-
-  if (preview) {
-    await mkdir(path.dirname(PREVIEW_FILE), { recursive: true });
-    await writeFile(PREVIEW_FILE, encodePng(renderPreview()));
-    console.log(`見本を書き出しました: ${path.relative(ROOT, PREVIEW_FILE)}（左から 案A・案B・案C）`);
-    return;
-  }
-
-  const shapes = DESIGNS[designArg]();
+  if (args.length > 0) throw new Error(`引数はありません: ${args.join(" ")}`);
+  const shapes = iconShapes();
+  const outer = checkSafeZone(shapes);
   await mkdir(ICONS_DIR, { recursive: true });
   await writeFile(path.join(ICONS_DIR, "icon.svg"), toSvg(shapes));
   for (const [file, size] of [["icon-512.png", 512], ["icon-192.png", 192], ["apple-touch-icon.png", 180]]) {
     await writeFile(path.join(ICONS_DIR, file), encodePng(renderIcon(shapes, size)));
   }
-  console.log(`案${designArg.toUpperCase()} で icons/ に書き出しました（icon.svg・icon-512.png・icon-192.png・apple-touch-icon.png）`);
+  console.log(`icons/ に書き出しました（icon.svg・icon-512.png・icon-192.png・apple-touch-icon.png）。図柄の一番外側は中央から ${outer.toFixed(1)}px（丸い切り抜きは ${SAFE_RADIUS}px まで）`);
 }
 
 await main();

@@ -77,7 +77,7 @@ screenshots/      Playwright で撮った画像（.gitignore 済み。コミッ�
 python3 -m http.server 8000     # ローカルで開く → http://localhost:8000/?debug=1
 node --test                     # テスト
 node scripts/validate-shops.mjs # 店データの検査（パスを渡すと別のファイルも検査できる）
-node scripts/make-icons.mjs     # アイコンを icons/ に書き出す（--preview で見本を screenshots/icon-preview.png に）
+node scripts/make-icons.mjs     # アイコンを icons/ に書き出す（丸い切り抜きの内側に収まっているかも検査する）
 npm run screenshot              # WebKit・iPhone相当の画面で ?debug=1 を撮る → screenshots/page-webkit.png
 ```
 
