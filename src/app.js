@@ -2,7 +2,7 @@
 // 計算は logic.js の関数に任せ、ここでは画面に出すことと、画面の切り替えだけを扱う。
 // 店名やヒントなどのデータを画面に出すときは textContent を使い、innerHTML に入れない。
 
-import { DECLINATION_DEG, INITIAL_ACCURACY_M, INITIAL_FIX_TIMEOUT_SEC, NOTICE_SEC, UNDO_SEC } from "./config.js";
+import { APP_VERSION, DECLINATION_DEG, INITIAL_ACCURACY_M, INITIAL_FIX_TIMEOUT_SEC, NOTICE_SEC, UNDO_SEC } from "./config.js";
 import {
   appMode,
   arrivalHoldExpired,
@@ -33,6 +33,7 @@ import {
   trophySummary,
   unreadableNotice,
   unwrapAngle,
+  versionLabel,
   waitingText,
 } from "./logic.js";
 import {
@@ -986,6 +987,7 @@ async function main() {
   // トロフィーをタップすると記録パネル（S5）を開く
   $("trophy").addEventListener("click", () => openRecords());
   $("records-close").addEventListener("click", closeRecords);
+  $("records-version").textContent = versionLabel(APP_VERSION);
   $("export-button").addEventListener("click", doExport);
   $("import-button").addEventListener("click", doImport);
   document.addEventListener("keydown", (e) => {

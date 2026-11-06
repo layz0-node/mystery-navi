@@ -1,0 +1,9 @@
+[
+ { "click": "#start-button" },
+ { "wait": 1500 },
+ { "click": "#trophy" },
+ { "wait": 300 },
+ { "click": "#records-version" },
+ { "wait": 300 },
+ { "shot": "p7v-01-panel-bottom" }
+]

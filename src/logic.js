@@ -691,6 +691,11 @@ export function exportDateLabel(time) {
   return `${d.getUTCFullYear()}年${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
 }
 
+// 記録パネルの一番下に出す版（"v10" → 「バージョン 10」）。UIは日本語のみなので、先頭の v は出さない
+export function versionLabel(version) {
+  return `バージョン ${String(version).replace(/^v/i, "")}`;
+}
+
 // 読めない記録があるときの注意（1件以上のときだけ）
 export function unreadableNotice(count) {
   return count > 0 ? `書き出せない記録が${count}件あります（端末の保存データには残してあります）` : null;

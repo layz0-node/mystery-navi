@@ -5,11 +5,11 @@
 //   SHOPS_TIMEOUT_MS で応答がないとき、またはつながらないときはキャッシュを使う。キャッシュもなければネットワークを待つ
 // - 別のサイト（Googleフォント）と GET 以外には手を出さない
 //
-// 画面やロジックを変えたら、CACHE_VERSION を上げる。
+// 画面やロジックを変えたら、CACHE_VERSION を上げる（src/config.js の APP_VERSION も同じ値にする）。
 // src/ やアイコンにファイルを足したら、APP_FILES にも足す（tests/pwa-files.test.js で入れ忘れを見つける）。
 // パスはすべて相対にする（GitHub Pages のサブパスで公開するため）。
 
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v10"; // src/config.js の APP_VERSION と同じ値にする
 const CACHE_PREFIX = "mystery-navi-"; // 同じドメインの他のページのキャッシュに触らないよう、消すのはこの名前で始まるものだけ
 const APP_CACHE = `${CACHE_PREFIX}app-${CACHE_VERSION}`;
 const DATA_CACHE = `${CACHE_PREFIX}data`; // 店リスト。アプリの版を上げても消さない

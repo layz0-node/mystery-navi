@@ -5,6 +5,7 @@ import { readFile, readdir } from "node:fs/promises";
 import zlib from "node:zlib";
 import { loadServiceWorker } from "./fixtures/fake-sw.js";
 import { APP_CACHE_PREFIX } from "../src/debug.js";
+import { APP_VERSION } from "../src/config.js";
 
 const ROOT = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, ROOT));
@@ -143,4 +144,9 @@ test("sw.js：一覧のファイルはすべて実在し、パスは相対で、
 test("sw.js とデバッグパネルで、アプリのキャッシュの名前の頭（mystery-navi-）がそろっている", async () => {
   const { constants } = await loadServiceWorker();
   assert.equal(APP_CACHE_PREFIX, constants.CACHE_PREFIX);
+});
+
+test("記録パネルに出す版（config.js の APP_VERSION）と、sw.js の CACHE_VERSION がそろっている", async () => {
+  const { constants } = await loadServiceWorker();
+  assert.equal(APP_VERSION, constants.CACHE_VERSION, "sw.js の CACHE_VERSION を上げたら、config.js の APP_VERSION も同じ値にしてください");
 });

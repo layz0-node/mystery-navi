@@ -21,7 +21,7 @@
   { "wait": 8000 },
 
   { "serverReplace": "index.html", "from": "はじめる</button>", "to": "はじめる（新しい版）</button>" },
-  { "serverReplace": "sw.js", "from": "const CACHE_VERSION = \"v9\";", "to": "const CACHE_VERSION = \"v10-test\";" },
+  { "serverReplace": "sw.js", "from": "const CACHE_VERSION = \"v10\";", "to": "const CACHE_VERSION = \"v11-test\";" },
   { "reload": true },
   { "wait": 3000 },
   { "shot": "p6-03-update-first" },

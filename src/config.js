@@ -24,6 +24,10 @@ export const MAP_SEARCH_URL = "https://www.google.com/maps/search/?api=1&query={
 export const HEADING_TIMEOUT_SEC = 3; // 方位センサーを待つ秒数。届かなければ「使えない」扱い。後から届いたら方位ありに戻す
 export const DECLINATION_DEG = 0; // 磁北と真北のずれの補正。西はマイナス（東京は西に約7度なので −7）。実機で必要と分かったら設定する
 
+// アプリの版。記録パネルの一番下に「バージョン 10」の形で出す（ホーム画面のアプリで、新しい版に入れ替わったかを確かめるため）。
+// sw.js の CACHE_VERSION と必ず同じ値にする（tests/pwa-files.test.js で確かめる）
+export const APP_VERSION = "v10";
+
 // 日本時間（UTC+9）。時刻の判定はすべてこの時差で行い、端末のタイムゾーンに頼らない（requirements.md T4）
 export const JST_OFFSET_MIN = 9 * 60;
 

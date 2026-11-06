@@ -6,6 +6,7 @@ import {
   importConfirmText,
   importErrorText,
   exportDateLabel,
+  versionLabel,
   unreadableNotice,
   savingFailed,
 } from "../src/logic.js";
@@ -123,4 +124,10 @@ test("保存できている → 出さない。保存せずに動いている、
   assert.equal(savingFailed({ saving: true, lastWriteFailed: false }), false);
   assert.equal(savingFailed({ saving: false, lastWriteFailed: false }), true);
   assert.equal(savingFailed({ saving: true, lastWriteFailed: true }), true);
+});
+
+test("版の表示：先頭の v を外して「バージョン 10」の形にする", () => {
+  assert.equal(versionLabel("v10"), "バージョン 10");
+  assert.equal(versionLabel("v9"), "バージョン 9");
+  assert.equal(versionLabel("11"), "バージョン 11");
 });

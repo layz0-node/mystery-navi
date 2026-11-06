@@ -22,7 +22,7 @@
 index.html
 style.css
 manifest.webmanifest  ホーム画面対応
-sw.js             サービスワーカー（変更したらバージョンを上げる。src/ やアイコンにファイルを足したら APP_FILES にも足す）
+sw.js             サービスワーカー（変更したらバージョンを上げる。config.js の APP_VERSION も同じ値にする。src/ やアイコンにファイルを足したら APP_FILES にも足す）
 icons/            ホーム画面用アイコン（指南魚のモチーフ）
 package.json      "type": "module"。devDependencies は Playwright だけ
 src/config.js     定数（requirements.md 9章）
@@ -68,7 +68,7 @@ screenshots/      Playwright で撮った画像（.gitignore 済み。コミッ�
 - 店データを触ったら `node scripts/validate-shops.mjs` が通っている
 - 画面を触ったら、Playwright でローカルの画面（`?debug=1`）を開いてスクリーンショットを撮り、確認した内容と画像のパスを報告する。**撮っていない画面を「確認した」と書かない**
 - 実機でしか確認できないこと（方位センサー、GPS、ホーム画面からの起動、画面のスリープ防止）は「未確認」と正直に書く
-- 画面やロジックを変えたら `sw.js` のキャッシュのバージョンを上げたか確認する
+- 画面やロジックを変えたら `sw.js` のキャッシュのバージョンを上げたか確認する（`src/config.js` の `APP_VERSION` も同じ値にする。記録パネルの一番下に「バージョン 10」の形で出る）
 - 報告には「やったこと／確認したこと／たまおが実機で確認すべきこと」を分けて書く
 
 ## よく使うコマンド
